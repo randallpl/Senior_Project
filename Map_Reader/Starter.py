@@ -13,7 +13,7 @@ from NewProjectWizard import NewProjectWizard
 About Window Class Containing Info About Project
 '''
 class AboutWindow(QDialog):
-    def __init__(self, dummy):
+    def __init__(self):
         super(AboutWindow, self).__init__()
         self.setFixedSize(240,180)
         self.setWindowTitle('About This Project')
@@ -21,13 +21,13 @@ class AboutWindow(QDialog):
         self.initUI()
     
     def initUI(self):
-        aboutlayout = QVBoxLayout() #Why can we not add this as class member?  self.aboutlayout = QVBoxLayout() doesn't work...
+        self.aboutlayout = QVBoxLayout()
         self.textbox = QLabel()
         self.textbox.setAlignment(Qt.AlignLeft)
         self.textbox.setWordWrap(True)
         self.textbox.setText('This project is was made by Evan Brittain, Gabriel Aguirre, Ryan Swearingen, Randall Plant, and Blake Carlisle.  More to follow...')
-        aboutlayout.addWidget(self.textbox)
-        self.setLayout(aboutlayout)
+        self.aboutlayout.addWidget(self.textbox)
+        self.setLayout(self.aboutlayout)
         self.show()
 
 '''
@@ -180,7 +180,7 @@ class StarterWindow(QDialog):
         '''
         Show About Screen
         '''
-        self.aboutScreen = AboutWindow(self) #Passes an invisible argument after self??? Caught with dummy parameter in __init__ of class
+        self.aboutScreen = AboutWindow()
 
 if __name__ == '__main__':
 
