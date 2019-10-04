@@ -351,8 +351,8 @@ class MainWindow(QMainWindow):
             )
 
             if choice == QMessageBox.Yes:
-                self.table.deleteRow(row)
                 del self.points[row]
+                self.table.update(self.points)
                 self.saveFile()
             
 

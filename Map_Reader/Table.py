@@ -99,10 +99,3 @@ class Table(QWidget):
             return self.proxyView.selectedIndexes()[0].row()
         except:
             return False
-
-    def deleteRow(self, index):
-        '''
-        Delete selected index from table
-        '''
-        self.model.removeRow(index)
-    
