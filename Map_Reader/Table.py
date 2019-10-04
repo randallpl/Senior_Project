@@ -1,5 +1,5 @@
 from PyQt5.QtCore import (QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt,
-        QTime)
+        QTime, QModelIndex)
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtWidgets import *
 import random
@@ -24,14 +24,17 @@ class Table(QWidget):
         model.setHeaderData(DESC, Qt.Horizontal, "Description")
 
         self.model.setSourceModel(model)
+        
 
-        self.proxyGroupBox = QGroupBox("Points")
-
+        self.proxyGroupBox = QGroupBox('Points')
+    
         self.proxyView = QTreeView()
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.model)
         self.proxyView.setSortingEnabled(True)
+
+        self.proxyView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         proxyLayout = QGridLayout()
         proxyLayout.addWidget(self.proxyView, 0, 0, 1, 3)
@@ -87,3 +90,12 @@ class Table(QWidget):
             self.model.setData(self.model.index(i, LON), data['Longitude'])
             self.model.setData(self.model.index(i, DATE), data['Date'])
             self.model.setData(self.model.index(i, DESC), data['Description'])
+    
+    def getRowIndex(self):
+        '''
+        Return index of selected row
+        '''
+        try:
+            return self.proxyView.selectedIndexes()[0].row()
+        except:
+            return False

@@ -2,7 +2,7 @@ import sys
 import os
 
 from PyQt5.QtWidgets import QAction, QMainWindow, QMessageBox, QMenu
-from PyQt5.QtCore import QDateTime, QDate
+from PyQt5.QtCore import QDateTime, QDate, Qt
 import pandas as pd
 import json
 from functools import partial
@@ -80,6 +80,16 @@ class MainWindow(QMainWindow):
         self.menuMouseSettings.setStatusTip('Mouse Settings')
         self.menuMouseSettings.triggered.connect(self.launchMouseSettings)
 
+        self.menuProjectSettings = QAction("Edit Project Data", self)
+        self.menuProjectSettings.setShortcut("Ctrl+P")
+        self.menuProjectSettings.setStatusTip('Project Data')
+        self.menuProjectSettings.triggered.connect(self.launchProjectSettings)
+
+        self.menuAPISettings = QAction("Add API Key", self)
+        self.menuAPISettings.setShortcut("Ctrl+I")
+        self.menuAPISettings.setStatusTip('API Key')
+        self.menuAPISettings.triggered.connect(self.launchAPISettings)
+
         self.fileMenu.addAction(self.menuNew)
         self.fileMenu.addAction(self.menuOpen)
         self.fileMenu.addAction(self.menuSave)
@@ -88,6 +98,8 @@ class MainWindow(QMainWindow):
         self.fileMenu.addAction(self.menuExit)
 
         self.settingsMenu.addAction(self.menuMouseSettings)
+        self.settingsMenu.addAction(self.menuProjectSettings)
+        self.settingsMenu.addAction(self.menuAPISettings)
 
         self.setCentralWidget(self.table)
 
@@ -95,11 +107,23 @@ class MainWindow(QMainWindow):
         if openExisting:
             self.openExistingProject(self.projectName)
 
+        self.setWindowTitle(f'Map Reader - {self.projectName}')
         self.show()
     
     def setProjectName(self, name):
+        try:
+            os.rename(f'./Projects/{self.projectName}', f'./Projects/{name}')
+        except:
+            QMessageBox.critical(
+                self,
+                'Project Error',
+                f'Invalid project name: {name}'
+            )
+            return
+
         self.projectName = name
-        
+        self.setWindowTitle(f'Map Reader - {self.projectName}')
+        self.saveFile()
 
     def referenceWindow(self):
         '''
@@ -112,6 +136,7 @@ class MainWindow(QMainWindow):
         Sets the local reference variable with point data passed from reference window
         '''
         self.reference = point
+        self.saveFile()
 
     def scaleTracker(self):
         '''
@@ -131,6 +156,7 @@ class MainWindow(QMainWindow):
         '''
         self.scale = scale
         self.units = units
+        self.saveFile()
         self.scaleTracker.close()
 
     def locationTracker(self):
@@ -172,14 +198,21 @@ class MainWindow(QMainWindow):
         self.menuExport.setEnabled(True)
         self.saveFile()
 
-    def setAPI(self, api_key):
+    def setAPI(self, api_key, plot):
         '''
         Set api key with key provided from APIKeyWindow
         '''
         self.api = api_key
-    
         self.saveFile()
-        self.mapWindow = MapWindow(self.api, self.reference, self.points)
+
+        if plot:
+            self.mapWindow = MapWindow(self.api, self.reference, self.points)
+
+    def launchAPISettings(self):
+        '''
+        Launch API key window to update API key from settings menu
+        '''
+        self.apiKeyWindow = APIKeyWindow(parent=self)
 
     def plotPoints(self):
         '''
@@ -198,14 +231,21 @@ class MainWindow(QMainWindow):
 
         if self.api:
             self.mapWindow = MapWindow(self.api, self.reference, self.points)
+        #No API key set, must launch window
         else:
-            self.apiKeyWindow = APIKeyWindow(self)
+            self.apiKeyWindow = APIKeyWindow(plot=True, parent=self)
 
     def launchMouseSettings(self):
         '''
         Launches instance of MouseSettingsWindow from setting menu
         '''
         self.mouseSettingsWindow = MouseSettingsWindow()
+
+    def launchProjectSettings(self):
+        '''
+        Launches instance of ProjectSettingsWindow from setting menu
+        '''
+        self.projectSettingsWindow = ProjectSettingsWindow(self)
 
     def saveFile(self):
         '''
@@ -230,7 +270,7 @@ class MainWindow(QMainWindow):
         Populates table with existing project data from given project
         '''
         try:
-            with open(f'{projectName}/project_data.json', 'r') as f:
+            with open(f'./Projects/{projectName}/project_data.json', 'r') as f:
                 data = json.loads(f.read())
         except:
             QMessageBox.critical(
@@ -333,3 +373,34 @@ class MainWindow(QMainWindow):
                 'Export File',
                 f'{filetype} file was successfully created'
             )
+
+    def deleteRowFromTable(self):
+        '''
+        Delete row from table and self.points list
+        '''
+        row = self.table.getRowIndex()
+        
+        if row is False:
+            return
+        else:
+            choice = QMessageBox.question(
+                self, 
+                'Confirm Deletion',
+                'Are you sure you want to delete?',
+                QMessageBox.Yes | QMessageBox.No
+            )
+
+            if choice == QMessageBox.Yes:
+                del self.points[row]
+                self.table.update(self.points)
+                self.saveFile()
+            
+    def keyPressEvent(self, event):
+        '''
+        Handle key events
+        Key_Delete: Delete row from table if highlighted
+        '''
+        key = event.key()
+
+        if key == Qt.Key_Delete:
+            self.deleteRowFromTable()

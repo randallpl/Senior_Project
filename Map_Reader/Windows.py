@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QDoubleValidator, QRegExpValidator
+from PyQt5.QtCore import Qt, QRegExp
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from geopy.distance import geodesic
 from collections import namedtuple
@@ -464,11 +464,14 @@ class MapWindow(QDialog):
         return marker
 
 class APIKeyWindow(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, plot=False, parent=None):
         super(APIKeyWindow, self).__init__(parent)
-
+        self.plot = plot
+        
         self.setFixedSize(350, 100)
         self.setWindowTitle('Enter API Key')
+        self.setAttribute(Qt.WA_QuitOnClose, False)
+        self.setModal(True)
         self.initUI()
 
     def initUI(self):
@@ -519,7 +522,66 @@ class APIKeyWindow(QDialog):
         Send scale and unit values entered by user back to mouse tracker
         screen when save button is clicked.
         '''
-        self.parent().setAPI(self.apiKeyEdit.text())
+        self.parent().setAPI(self.apiKeyEdit.text(), self.plot)
+        self.close()
+
+    def cancel(self):
+        '''
+        Return to mouse tracker screen if cancel button is clicked
+        '''
+        self.close()
+
+class ProjectSettingsWindow(QDialog):
+    def __init__(self, parent=None):
+        super(ProjectSettingsWindow, self).__init__(parent)
+
+        self.setFixedSize(350, 100)
+        self.setWindowTitle('Edit Project Data')
+        self.setAttribute(Qt.WA_QuitOnClose, False)
+        self.setModal(True)
+        self.initUI()
+
+    def initUI(self):
+        '''
+        Setup GUI elements of scale window
+        '''
+        mainLayout = QVBoxLayout()
+
+        self.nameEdit = QLineEdit()
+        self.nameEdit.setPlaceholderText('Project Name')
+        self.nameEdit.setValidator(QRegExpValidator(QRegExp('[^\\\*<>:"/\|?*]+')))
+        self.nameEdit.textChanged.connect(self.checkFields)
+
+        #horizontal layout containing save and cancel buttons
+        hLayout = QHBoxLayout()
+        self.saveButton = QPushButton('Save')
+        self.saveButton.clicked.connect(self.save)
+
+        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton.clicked.connect(self.cancel)
+
+        hLayout.addWidget(self.saveButton)
+        hLayout.addWidget(self.cancelButton)
+
+        mainLayout.addWidget(self.nameEdit)
+        mainLayout.addLayout(hLayout)
+    
+        self.setLayout(mainLayout)
+        self.setModal(True)
+        self.show()
+
+    def checkFields(self):
+        '''
+        Check if all mandatory fields are entered
+        '''
+        if self.nameEdit.text():
+            self.saveButton.setEnabled(True)
+
+    def save(self):
+        '''
+        Send data back to MainWindow to update project data
+        '''
+        self.parent().setProjectName(self.nameEdit.text())
         self.close()
 
     def cancel(self):
