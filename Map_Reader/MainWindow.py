@@ -2,7 +2,7 @@ import sys
 import os
 
 from PyQt5.QtWidgets import QAction, QMainWindow, QMessageBox, QMenu
-from PyQt5.QtCore import QDateTime, QDate
+from PyQt5.QtCore import QDateTime, QDate, Qt
 import pandas as pd
 import json
 from functools import partial
@@ -333,3 +333,35 @@ class MainWindow(QMainWindow):
                 'Export File',
                 f'{filetype} file was successfully created'
             )
+
+    def deleteRowFromTable(self):
+        '''
+        Delete row from table and self.points list
+        '''
+        row = self.table.getRowIndex()
+        
+        if row is False:
+            return
+        else:
+            choice = QMessageBox.question(
+                self, 
+                'Confirm Deletion',
+                'Are you sure you want to delete?',
+                QMessageBox.Yes | QMessageBox.No
+            )
+
+            if choice == QMessageBox.Yes:
+                self.table.deleteRow(row)
+                del self.points[row]
+                self.saveFile()
+            
+
+    def keyPressEvent(self, event):
+        '''
+        Handle key events
+        Key_Delete: Delete row from table if highlighted
+        '''
+        key = event.key()
+
+        if key == Qt.Key_Delete:
+            self.deleteRowFromTable()
