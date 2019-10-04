@@ -26,8 +26,8 @@ class Table(QWidget):
         self.model.setSourceModel(model)
         
 
-        self.proxyGroupBox = QGroupBox("Points")
-
+        self.proxyGroupBox = QGroupBox('Points')
+    
         self.proxyView = QTreeView()
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)

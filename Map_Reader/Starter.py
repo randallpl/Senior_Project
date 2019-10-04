@@ -146,14 +146,14 @@ class StarterWindow(QDialog):
             #Check if json data file is in selected folder
             if os.path.exists(f'{filename}/project_data.json'):
                 self.hide()
-
+                projectName = filename.split('/')[-1]
                 if self.mw:
-                    if self.mw.projectName == filename.split('/')[-1]:
+                    if self.mw.projectName == projectName:
                         return
                     else:
                         self.mw.close()
 
-                self.mw = MainWindow(filename, self, openExisting=True)
+                self.mw = MainWindow(projectName, self, openExisting=True)
 
             #alert for invalid project and return to main window or starter screen
             else:
