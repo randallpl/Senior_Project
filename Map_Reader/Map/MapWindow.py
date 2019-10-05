@@ -1,13 +1,8 @@
 import os
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QJsonValue, QVariant
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWebChannel import QWebChannel
-import webbrowser
-import sys
-import json
-import random
 
 
 class MapWindow(QDialog):
