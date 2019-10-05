@@ -48,7 +48,7 @@ class MapWindow(QDialog):
     def getRef(self):
         return [{'lat': self.ref[0], 'lng': self.ref[1]}]
 
-    #pass reference point to index.html
+    #pass point data to index.html
     @pyqtSlot(result=list)
     def getPoints(self):
         gmapsPoints = [{
@@ -59,6 +59,7 @@ class MapWindow(QDialog):
 
         return gmapsPoints
 
-
-    def closeEvent(self, event):
-        sys.exit()
+    #pass api key to index.html
+    @pyqtSlot(result=str)
+    def getAPIKey(self):
+        return self.api
