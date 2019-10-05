@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
+        <script type="text/javascript">
+            window.onload = function()
+            {
+                
+            }
+        </script>
+    </head>
+</html>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+        var map;
+        function contentString(pid, desc, date){
+            if (desc != ''){
+                desc += '</br></br>'
+            }
+            var contentString ='<h3>Point ' + pid + '</h3>'+
+                '<p>' + desc + '\n' + 'last visited: ' + date + '</p>'
+            return contentString
+        }
+        function initMap() {
+            var backend = null;
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+                backend = channel.objects.backend;
+                    backend.getRef(function(ref) {
+                        backend.getPoints(function(points){
+                            map = new google.maps.Map(document.getElementById('map'), {
+                                center: ref[0],
+                                zoom: 10
+                            });
+
+                            var markers = [points.length];
+                            var markersInfo = [points.length]
+
+                            var refMarker = new google.maps.Marker({
+                                icon : 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                                position: ref[0],
+                                map: map,
+                                title: 'Reference Point'
+                            });
+
+                            var refInfo = new google.maps.InfoWindow({
+                                    content: 'Referenece Point'
+                            });
+
+                            refMarker.addListener('click', function() {
+                                    refInfo.open(map, refMarker);
+                            });
+
+                            for(let i=0; i<points.length; i++){
+                                var desc = points[i]['Description']
+                                var loc = points[i]['Point']
+                                var date = points[i]['Date']
+
+                                markersInfo[i] = new google.maps.InfoWindow({
+                                    content: contentString(i+1, desc, date)
+                                });
+
+                                markers[i] = new google.maps.Marker({
+                                    icon : 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                                    position: loc,
+                                    map: map,
+                                    title: desc
+                                });
+
+                                markers[i].addListener('click', function() {
+                                    markersInfo[i].open(map, markers[i]);
+                                });
+                            }
+                        });
+                    });                   
+                });
+        }
+    </script>
+    <script>
+        function loadScript(){
+            var backend = null;
+            new QWebChannel(qt.webChannelTransport, function(channel) {
+                backend = channel.objects.backend;
+                backend.getAPIKey(function(key){
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = 'https://maps.googleapis.com/maps/api/js?v=3' +
+                    '&key=' + key +'&callback=initMap';
+                    document.body.appendChild(script);
+                });
+            });
+        }   
+        loadScript()
+    </script>
+  </body>
+</html>
