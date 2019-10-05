@@ -1,3 +1,4 @@
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtCore import Qt, QUrl, pyqtSlot, QJsonValue, QVariant
@@ -6,12 +7,13 @@ from PyQt5.QtWebChannel import QWebChannel
 import webbrowser
 import sys
 import json
+import random
 
 
 class MapWindow(QDialog):
-    def __init__(self, ref, points):
+    def __init__(self, api, ref, points):
         super(MapWindow, self).__init__()
-        
+        self.api = api
         self.ref = ref
         self.points = points
 
@@ -28,33 +30,35 @@ class MapWindow(QDialog):
         Setup GUI elements of scale window
         '''
         layout = QVBoxLayout()
-
-        # setup a page with my html
-        
-        
         self.mapView = QWebEngineView()
 
         self.webchannel = QWebChannel(self.mapView)
         self.mapView.page().setWebChannel(self.webchannel)
         self.webchannel.registerObject('backend', self)
-        self.mapView.load(QUrl('file:///index.html'))
+
+        current_dir = os.path.dirname(os.path.realpath(__file__))
+        filename = os.path.join(current_dir, 'index.html')
+        self.mapView.load(QUrl.fromLocalFile(filename))
 
         layout.addWidget(self.mapView)
         self.setLayout(layout)
 
+    #pass reference point to index.html
     @pyqtSlot(result=list)
     def getRef(self):
         return [{'lat': self.ref[0], 'lng': self.ref[1]}]
 
-    @pyqtSlot(list)
-    def printRef(self, ref):
-        ref, *_ = ref
-        print('inside printRef:', ref)
+    #pass reference point to index.html
+    @pyqtSlot(result=list)
+    def getPoints(self):
+        gmapsPoints = [{
+            'Point': {'lat': p['Latitude'], 'lng': p['Longitude']},
+            'Description': p['Description'],
+            'Date': p['Date']
+        } for p in self.points]
+
+        return gmapsPoints
+
 
     def closeEvent(self, event):
         sys.exit()
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = MapWindow((37.12345, -120.12345), None)
-    sys.exit(app.exec_())
