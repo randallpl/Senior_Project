@@ -11,7 +11,6 @@ import requests
 import Tracker
 from Table import Table
 from Windows import *
-from Map.MapWindow import MapWindow
 
 class MainWindow(QMainWindow):
     def __init__(self, projectName, parent, reference=None, createdDate=None, openExisting=False):
