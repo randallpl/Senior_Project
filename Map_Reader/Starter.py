@@ -8,6 +8,7 @@ import json
 
 from MainWindow import MainWindow
 from NewProjectWizard import NewProjectWizard
+from CustomQtObjects import Button
 
 '''
 About Window Class Containing Info About Project
@@ -59,13 +60,13 @@ class StarterWindow(QDialog):
         self.projectTable = StarterTable(self)
         
 
-        self.newButton = QPushButton('New')
+        self.newButton = Button('New')
         self.newButton.clicked.connect(self.newProject)
 
-        self.openButton = QPushButton('Open')
+        self.openButton = Button('Open')
         self.openButton.clicked.connect(self.openProject)
 
-        self.aboutButton = QPushButton('About')
+        self.aboutButton = Button('About')
         self.aboutButton.clicked.connect(self.aboutProject)
         
         mainLayout.addWidget(self.projectTable)

@@ -1,8 +1,10 @@
 from PyQt5.QtCore import (QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt,
-        QTime, QModelIndex)
-from PyQt5.QtGui import QStandardItemModel
+        QTime, QModelIndex, QSize)
+from PyQt5.QtGui import QStandardItemModel, QIcon
 from PyQt5.QtWidgets import *
 import random
+
+from CustomQtObjects import Button
 
 #Define constants for table columns
 PID, LAT, LON, DATE, DESC = range(5)
@@ -44,19 +46,19 @@ class Table(QWidget):
         hLayout = QHBoxLayout()
 
         #Add refrence button and connect it to referenceWindow() in MainWindow to launch window
-        self.addRefButton = QPushButton('Add Reference')
+        self.addRefButton = Button('Add Reference')
         self.addRefButton.clicked.connect(self.parent().referenceWindow)
         
         #Add scale button and connect it to scaleTracker() in MainWindow to launch window
-        self.setScaleButton = QPushButton('Set Scale')
+        self.setScaleButton = Button('Set Scale')
         self.setScaleButton.clicked.connect(self.parent().scaleTracker)
 
         #Add locate button and connect it locationTracker() in MainWindow to launch window
-        self.locateButton = QPushButton('Locate Point')
+        self.locateButton = Button('Locate Point')
         self.locateButton.clicked.connect(self.parent().locationTracker)
 
         #Add Plot button and connect it to plotPoints() in MainWindow to launch window
-        self.plotButton = QPushButton('Plot')
+        self.plotButton = Button('Plot')
         self.plotButton.clicked.connect(self.parent().plotPoints)
 
         #Add all button to horizontal layout

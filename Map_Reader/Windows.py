@@ -8,6 +8,7 @@ from PyQt5.QtWebChannel import QWebChannel
 import webbrowser
 
 from MouseController import MouseController
+from CustomQtObjects import Button
 
 #Class to confirm the scale input data
 class ScaleWindow(QDialog):
@@ -49,10 +50,10 @@ class ScaleWindow(QDialog):
 
         #horizontal layout containing save and cancel buttons
         h2Layout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
 
-        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
         h2Layout.addWidget(self.saveButton)
@@ -130,11 +131,11 @@ class ReferenceWindow(QDialog):
 
         #horizontal layout containing save and cancel buttons
         h2Layout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
         self.saveButton.setEnabled(False)
 
-        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
         h2Layout.addWidget(self.saveButton)
@@ -153,6 +154,8 @@ class ReferenceWindow(QDialog):
         '''
         if self.lonEdit.text() and self.latEdit.text():
             self.saveButton.setEnabled(True)
+        else:
+            self.saveButton.setEnabled(False)
 
     def save(self):
         '''
@@ -232,10 +235,10 @@ class LocationWindow(QDialog):
 
         #horizontal layout containing save and cancel buttons
         h3Layout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
 
-        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
         h3Layout.addWidget(self.saveButton)
@@ -342,10 +345,10 @@ class MouseSettingsWindow(QDialog):
 
         #horizontal layout containing save and cancel buttons
         h2Layout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
 
-        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
         h2Layout.addWidget(self.saveButton)
@@ -395,7 +398,7 @@ class APIKeyWindow(QDialog):
         self.apiKeyEdit.setPlaceholderText('Google API Key')
         self.apiKeyEdit.textChanged.connect(self.checkFields)
 
-        self.helpButton = QPushButton('?')
+        self.helpButton = Button('?')
         self.helpButton.setMaximumWidth(25)
         self.helpButton.clicked.connect(lambda: webbrowser.open('https://developers.google.com/maps/documentation/javascript/get-api-key'))
 
@@ -404,10 +407,10 @@ class APIKeyWindow(QDialog):
 
         #horizontal layout containing save and cancel buttons
         h2Layout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
 
-        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
         h2Layout.addWidget(self.saveButton)
@@ -464,10 +467,10 @@ class ProjectSettingsWindow(QDialog):
 
         #horizontal layout containing save and cancel buttons
         hLayout = QHBoxLayout()
-        self.saveButton = QPushButton('Save')
+        self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
 
-        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
         hLayout.addWidget(self.saveButton)
@@ -486,6 +489,8 @@ class ProjectSettingsWindow(QDialog):
         '''
         if self.nameEdit.text():
             self.saveButton.setEnabled(True)
+        else:
+            self.saveButton.setEnabled(False)
 
     def save(self):
         '''
