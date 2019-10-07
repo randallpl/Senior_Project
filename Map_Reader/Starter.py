@@ -18,7 +18,6 @@ class AboutWindow(QDialog):
         super(AboutWindow, self).__init__()
         self.setFixedSize(240,180)
         self.setWindowTitle('About This Project')
-
         self.initUI()
     
     def initUI(self):
@@ -37,7 +36,12 @@ Main Window
 class StarterWindow(QDialog):
     def __init__(self):
         super(StarterWindow, self).__init__()
-        self.setFixedSize(300, 200)
+        with open('./Resources/stylesheet.css', 'rt') as f:        
+            qApp.setStyleSheet(f.read())
+        
+        qApp.setWindowIcon(QtGui.QIcon('./Resources/icons/app_icon.png'))
+
+        self.setFixedSize(300, 400)
         self.setWindowTitle('Welcome')
         self.mw = None
         self.newProjectWizard = None

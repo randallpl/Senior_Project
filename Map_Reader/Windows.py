@@ -8,7 +8,7 @@ from PyQt5.QtWebChannel import QWebChannel
 import webbrowser
 
 from MouseController import MouseController
-from CustomQtObjects import Button
+from CustomQtObjects import Button, LineEdit
 
 #Class to confirm the scale input data
 class ScaleWindow(QDialog):
@@ -18,7 +18,6 @@ class ScaleWindow(QDialog):
         self.dist_px = dist_px
         self.scale = 1
 
-        self.setFixedSize(300, 100)
         self.setWindowTitle('Scale')
         self.initUI()
 
@@ -30,10 +29,10 @@ class ScaleWindow(QDialog):
 
         #horizontal layout containing lineedits, unit selector, and label
         hLayout = QHBoxLayout() 
-        self.pixelEdit = QLineEdit(str(self.dist_px))
+        self.pixelEdit = LineEdit(str(self.dist_px))
         self.pixelEdit.setValidator(QDoubleValidator(0.99, 1000.00, 2))
         self.pixelEdit.textChanged.connect(self.checkFields)
-        self.scaleEdit = QLineEdit(str(self.scale))
+        self.scaleEdit = LineEdit(str(self.scale))
         self.scaleEdit.setValidator(QDoubleValidator(0.99, 1000.00, 2))
         self.scaleEdit.textChanged.connect(self.checkFields)
 
@@ -104,7 +103,7 @@ class ScaleWindow(QDialog):
 class ReferenceWindow(QDialog):
     def __init__(self, parent=None):
         super(ReferenceWindow, self).__init__(parent)
-        self.setFixedSize(300, 100)
+        self.resize(400, 100)
         self.setWindowTitle('Add Reference Point')
         self.initUI()
 
@@ -116,12 +115,13 @@ class ReferenceWindow(QDialog):
 
         #horizontal layout containing lineedits, unit selector, and label
         hLayout = QHBoxLayout() 
-        self.latEdit = QLineEdit()
+
+        self.latEdit = LineEdit()
         self.latEdit.setValidator(QDoubleValidator(-90, 90, 5))
         self.latEdit.setPlaceholderText('Latitude')
         self.latEdit.textChanged.connect(self.checkFields)
 
-        self.lonEdit = QLineEdit()
+        self.lonEdit = LineEdit()
         self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))
         self.lonEdit.setPlaceholderText('Longitude')
         self.lonEdit.textChanged.connect(self.checkFields)
@@ -200,10 +200,10 @@ class LocationWindow(QDialog):
 
         #horizontal layout containing lineedits, unit selector, and label
         hLayout = QHBoxLayout() 
-        self.latEdit = QLineEdit(str(self.lat))
+        self.latEdit = LineEdit(str(self.lat))
         self.latEdit.setValidator(QDoubleValidator(-90, 90, 5)) 
         self.latEdit.textChanged.connect(self.checkFields)
-        self.lonEdit = QLineEdit(str(self.lon))
+        self.lonEdit = LineEdit(str(self.lon))
         self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))   
         self.lonEdit.textChanged.connect(self.checkFields)
 
@@ -220,10 +220,10 @@ class LocationWindow(QDialog):
 
         h2Layout = QHBoxLayout() 
 
-        self.distEdit = QLineEdit(str(self.dist))
+        self.distEdit = LineEdit(str(self.dist))
         self.distEdit.setValidator(QDoubleValidator(0, 100000000, 5)) 
         self.distEdit.textChanged.connect(self.checkFields)
-        self.bearingEdit = QLineEdit(str(self.bearing))
+        self.bearingEdit = LineEdit(str(self.bearing))
         self.bearingEdit.setValidator(QDoubleValidator(0, 360, 5))
         self.bearingEdit.textChanged.connect(self.checkFields)
 
@@ -313,7 +313,6 @@ class MouseSettingsWindow(QDialog):
         self.speedSetting = self.origSpeed
         self.accelSetting = self.origAccel
 
-        self.setFixedSize(300, 150)
         self.setWindowTitle('Mouse Settings')
         self.setAttribute(Qt.WA_QuitOnClose, False)
         self.initUI()
@@ -381,7 +380,6 @@ class APIKeyWindow(QDialog):
         super(APIKeyWindow, self).__init__(parent)
         self.plot = plot
         
-        self.setFixedSize(350, 100)
         self.setWindowTitle('Enter API Key')
         self.setAttribute(Qt.WA_QuitOnClose, False)
         self.setModal(True)
@@ -394,7 +392,7 @@ class APIKeyWindow(QDialog):
         mainLayout = QVBoxLayout()
 
         hLayout = QHBoxLayout()
-        self.apiKeyEdit = QLineEdit()
+        self.apiKeyEdit = LineEdit()
         self.apiKeyEdit.setPlaceholderText('Google API Key')
         self.apiKeyEdit.textChanged.connect(self.checkFields)
 
@@ -448,7 +446,6 @@ class ProjectSettingsWindow(QDialog):
     def __init__(self, parent=None):
         super(ProjectSettingsWindow, self).__init__(parent)
 
-        self.setFixedSize(350, 100)
         self.setWindowTitle('Edit Project Data')
         self.setAttribute(Qt.WA_QuitOnClose, False)
         self.setModal(True)
@@ -460,7 +457,7 @@ class ProjectSettingsWindow(QDialog):
         '''
         mainLayout = QVBoxLayout()
 
-        self.nameEdit = QLineEdit()
+        self.nameEdit = LineEdit()
         self.nameEdit.setPlaceholderText('Project Name')
         self.nameEdit.setValidator(QRegExpValidator(QRegExp('[^\\\*<>:"/\|?*]+')))
         self.nameEdit.textChanged.connect(self.checkFields)
@@ -512,7 +509,7 @@ class MapWindow(QDialog):
         self.ref = ref
         self.points = points
 
-        self.setFixedSize(1080, 768)
+        self.resize(1080, 768)
         self.setWindowTitle('Map')
         self.setModal(True)
         self.setAttribute(Qt.WA_QuitOnClose, False)
