@@ -21,10 +21,12 @@ class LineEdit(QLineEdit):
         super(LineEdit, self).__init__()
         self.setText(name)
     def focusInEvent(self, event):
+        QLineEdit.focusInEvent(self, event)
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(2)
         shadow.setOffset(3, 3)
         self.setGraphicsEffect(shadow)
 
     def focusOutEvent(self, event):
+        QLineEdit.focusOutEvent(self, event)
         self.setGraphicsEffect(None)
