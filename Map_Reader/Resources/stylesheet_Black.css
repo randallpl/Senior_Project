@@ -1,5 +1,5 @@
 QPushButton {
-    background-color: rgb(47, 145, 211);
+    background-color: rgb(91, 94, 97);
     border: 1px solid rgba(0, 0, 0, 0.233);
     border-radius: 2px;
     color: rgb(255, 255, 255);
@@ -14,11 +14,11 @@ QPushButton {
   }
   
   QPushButton:hover {
-    background-color: rgb(22, 111, 170);
+    background-color: rgb(65, 67, 70);
   }
 
   QPushButton:pressed {
-    background-color: rgb(0, 70, 117);
+    background-color: rgb(30, 31, 32);
   }
 
   QLineEdit {
@@ -39,15 +39,19 @@ QLineEdit:empty{
 }
 
 QLabel{
-    color: rgb(68, 68, 68);
+    color: rgb(255, 255, 255);
     font-size: 15px;
     font-weight: bold;
 }
 
 QDialog{
-  background-image: url('./Resources/app_bg.jpg');
+  background-image: url('./Resources/app_bg_black.jpg');
 }
 
 QMainWindow{
-  background-image: url('./Resources/app_bg.jpg');
+  background-image: url('./Resources/app_bg_black.jpg');
+}
+
+QWizard{
+  background-image: url('./Resources/app_bg_black.jpg');
 }

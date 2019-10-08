@@ -36,8 +36,6 @@ Main Window
 class StarterWindow(QDialog):
     def __init__(self):
         super(StarterWindow, self).__init__()
-        with open('./Resources/stylesheet.css', 'rt') as f:        
-            qApp.setStyleSheet(f.read())
         
         qApp.setWindowIcon(QtGui.QIcon('./Resources/icons/app_icon.png'))
 
