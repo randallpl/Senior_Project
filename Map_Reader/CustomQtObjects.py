@@ -20,6 +20,7 @@ class LineEdit(QLineEdit):
     def __init__(self, name=None):
         super(LineEdit, self).__init__()
         self.setText(name)
+        
     def focusInEvent(self, event):
         QLineEdit.focusInEvent(self, event)
         shadow = QGraphicsDropShadowEffect()
