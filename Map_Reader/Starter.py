@@ -44,10 +44,13 @@ class StarterWindow(QDialog):
         self.mw = None
         self.newProjectWizard = None
         self.aboutWindow = None
+        self.settings = None
 
         #Create main projects directory
         if not os.path.exists('./Projects'):
             os.mkdir('./Projects')
+
+        self.loadSettings()
         
         self.initUI()
 
@@ -81,6 +84,45 @@ class StarterWindow(QDialog):
         self.setLayout(mainLayout)
 
         self.show()
+
+    def loadSettings(self):
+        '''
+        Load default user settings
+        '''
+        path = './Settings/settings.json'
+
+        try:
+            with open('./Settings/settings.json', 'rt') as f:
+                self.settings = json.loads(f.read())
+        #No settings file found, create defaults and save to settings.json
+        except FileNotFoundError:
+            os.mkdir('./Settings')
+            self.settings = {
+                'Theme': None
+            }
+            self.saveSettings()
+
+        self.loadTheme(theme=self.settings.get('Theme'))
+
+    def saveSettings(self):
+        '''
+        Save updated settings data 
+        '''
+        with open('./Settings/settings.json', 'w+') as f:
+            f.write(json.dumps(self.settings))
+
+    def loadTheme(self, theme=None, save=False):
+        '''
+        Load given theme and save to settings file if flag is set
+        '''
+        if save:
+            self.settings['Theme'] = theme
+            self.saveSettings()
+        if theme:
+            with open(f'./Resources/stylesheet_{theme}.css', 'rt') as f:
+                qApp.setStyleSheet(f.read())
+        else:
+            qApp.setStyleSheet(None)
 
     def newProject(self):
         '''

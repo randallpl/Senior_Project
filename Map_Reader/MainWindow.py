@@ -25,7 +25,6 @@ class MainWindow(QMainWindow):
         self.savedPoints = []
         self.createdDate = createdDate
         self.api = None
-        self.theme = None
         
         menubar = self.menuBar()
         self.fileMenu = menubar.addMenu('File')
@@ -96,18 +95,18 @@ class MainWindow(QMainWindow):
 
         self.themeBlack = QAction('Black', self)
         self.menuTheme.addAction(self.themeBlack)
-        self.themeBlack.hovered.connect(partial(self.changeTheme, 'Black'))
-        self.themeBlack.triggered.connect(partial(self.changeTheme, theme='Black', save=True))
+        self.themeBlack.hovered.connect(partial(self.parent().loadTheme, 'Black'))
+        self.themeBlack.triggered.connect(partial(self.parent().loadTheme, theme='Black', save=True))
 
         self.themeBlue = QAction('Blue', self)
         self.menuTheme.addAction(self.themeBlue)
-        self.themeBlue.hovered.connect(partial(self.changeTheme, 'Blue'))
-        self.themeBlue.triggered.connect(partial(self.changeTheme, theme='Blue', save=True))
+        self.themeBlue.hovered.connect(partial(self.parent().loadTheme, 'Blue'))
+        self.themeBlue.triggered.connect(partial(self.parent().loadTheme, theme='Blue', save=True))
 
         self.themeDefault = QAction('Default', self)
         self.menuTheme.addAction(self.themeDefault)
-        self.themeDefault.hovered.connect(self.changeTheme)
-        self.themeDefault.hovered.connect(partial(self.changeTheme, save=True))
+        self.themeDefault.hovered.connect(self.parent().loadTheme)
+        self.themeDefault.hovered.connect(partial(self.parent().loadTheme, save=True))
 
         self.fileMenu.addAction(self.menuNew)
         self.fileMenu.addAction(self.menuOpen)
@@ -281,7 +280,6 @@ class MainWindow(QMainWindow):
             'Units': self.units,
             'Points': self.points,
             'APIKey': self.api,
-            'Theme': self.theme
         }
 
         with open(f'./Projects/{self.projectName}/project_data.json', 'w+') as f:
@@ -307,13 +305,10 @@ class MainWindow(QMainWindow):
             self.units = data.get('Units')
             self.points = data.get('Points')
             self.api = data.get('APIKey')
-            self.theme = data.get('Theme')
 
         if self.points:
             self.menuExport.setEnabled(True)
             self.table.update(self.points)
-
-        self.changeTheme(theme=self.theme)
 
     def closeApplication(self):
         '''
@@ -381,19 +376,6 @@ class MainWindow(QMainWindow):
             self.fileCreatedAlert('HTML', True)
         else:
             self.fileCreatedAlert('HTML')
-
-    def changeTheme(self, theme=None, save=False):
-        '''
-        Change theme of app
-        '''
-        if save:
-            self.theme = theme
-            self.saveFile()
-        if theme:
-            with open(f'./Resources/stylesheet_{theme}.css', 'rt') as f:
-                qApp.setStyleSheet(f.read())
-        else:
-            qApp.setStyleSheet(None)
 		
     def fileCreatedAlert(self, filetype, error=False):
         '''
