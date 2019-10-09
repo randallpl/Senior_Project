@@ -95,18 +95,19 @@ class MainWindow(QMainWindow):
 
         self.themeBlack = QAction('Black', self)
         self.menuTheme.addAction(self.themeBlack)
-        self.themeBlack.hovered.connect(partial(self.parent().loadTheme, 'Black'))
-        self.themeBlack.triggered.connect(partial(self.parent().loadTheme, theme='Black', save=True))
+        self.themeBlack.triggered.connect(partial(self.parent().loadTheme, 'Black'))
 
         self.themeBlue = QAction('Blue', self)
         self.menuTheme.addAction(self.themeBlue)
-        self.themeBlue.hovered.connect(partial(self.parent().loadTheme, 'Blue'))
-        self.themeBlue.triggered.connect(partial(self.parent().loadTheme, theme='Blue', save=True))
+        self.themeBlue.triggered.connect(partial(self.parent().loadTheme, 'Blue'))
+
+        self.themeGreen = QAction('Green', self)
+        self.menuTheme.addAction(self.themeGreen)
+        self.themeGreen.triggered.connect(partial(self.parent().loadTheme, 'Green'))
 
         self.themeDefault = QAction('Default', self)
         self.menuTheme.addAction(self.themeDefault)
-        self.themeDefault.hovered.connect(self.parent().loadTheme)
-        self.themeDefault.hovered.connect(partial(self.parent().loadTheme, save=True))
+        self.themeDefault.triggered.connect(partial(self.parent().loadTheme))
 
         self.fileMenu.addAction(self.menuNew)
         self.fileMenu.addAction(self.menuOpen)

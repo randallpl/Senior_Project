@@ -102,7 +102,7 @@ class StarterWindow(QDialog):
             }
             self.saveSettings()
 
-        self.loadTheme(theme=self.settings.get('Theme'))
+        self.loadTheme(self.settings.get('Theme'))
 
     def saveSettings(self):
         '''
@@ -111,18 +111,18 @@ class StarterWindow(QDialog):
         with open('./Settings/settings.json', 'w+') as f:
             f.write(json.dumps(self.settings))
 
-    def loadTheme(self, theme=None, save=False):
+    def loadTheme(self, theme=None):
         '''
-        Load given theme and save to settings file if flag is set
+        Load given theme and save to settings file
         '''
-        if save:
-            self.settings['Theme'] = theme
-            self.saveSettings()
         if theme:
             with open(f'./Resources/stylesheet_{theme}.css', 'rt') as f:
                 qApp.setStyleSheet(f.read())
         else:
             qApp.setStyleSheet(None)
+
+        self.settings['Theme'] = theme
+        self.saveSettings()
 
     def newProject(self):
         '''

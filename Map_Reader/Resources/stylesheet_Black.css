@@ -38,6 +38,20 @@ QLineEdit:empty{
   border: 3px solid rgb(255, 55, 55);
 }
 
+QTreeView {
+  alternate-background-color: rgba(235, 235, 235, 0.712);
+  color: rgb(0, 0, 0);
+}
+
+QTreeView::item:selected:active{
+  background-color: rgba(53, 53, 53, 0.555);
+}
+
+QTreeView::item::hover{
+  background-color: rgba(179, 179, 179, 0.555);
+}
+
+
 QLabel{
     color: rgb(255, 255, 255);
     font-size: 15px;
