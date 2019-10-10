@@ -3,32 +3,12 @@ import os
 from PyQt5.QtCore import Qt, QDateTime, QStringListModel
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
-from StarterTable import StarterTable
 import json
 
 from MainWindow import MainWindow
 from NewProjectWizard import NewProjectWizard
-from CustomQtObjects import Button
-
-'''
-About Window Class Containing Info About Project
-'''
-class AboutWindow(QDialog):
-    def __init__(self):
-        super(AboutWindow, self).__init__()
-        self.setFixedSize(240,180)
-        self.setWindowTitle('About This Project')
-        self.initUI()
-    
-    def initUI(self):
-        self.aboutlayout = QVBoxLayout()
-        self.textbox = QLabel()
-        self.textbox.setAlignment(Qt.AlignLeft)
-        self.textbox.setWordWrap(True)
-        self.textbox.setText('This project is was made by Evan Brittain, Gabriel Aguirre, Ryan Swearingen, Randall Plant, and Blake Carlisle.  More to follow...')
-        self.aboutlayout.addWidget(self.textbox)
-        self.setLayout(self.aboutlayout)
-        self.show()
+from CustomQtObjects import Button, Table
+from Windows import AboutWindow
 
 '''
 Main Window
@@ -62,9 +42,8 @@ class StarterWindow(QDialog):
 
         #horizontal layout containing new and open buttons
         hLayout = QHBoxLayout()
-        self.projectTable = StarterTable(self)
+        self.projectTable = Table('Projects', self.getProjects(), columns=['Projects'])
         
-
         self.newButton = Button('New')
         self.newButton.clicked.connect(self.newProject)
 
@@ -206,12 +185,15 @@ class StarterWindow(QDialog):
                     self,
                     'Invalid Project',
                     f'{filename} is an invalid project')
-        
+    
+    def getProjects(self):
+        return [{'Projects': f.name} for f in os.scandir('./Projects') if f.is_dir()]
 
     def starterScreen(self, closeMW=False):
         '''
         Display starter page if hidden
         '''
+        self.projectTable.update(self.getProjects())
         if closeMW:
             self.mw.close()
             self.mw = None

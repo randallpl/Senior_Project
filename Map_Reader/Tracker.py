@@ -311,15 +311,3 @@ class Tracker(QDialog):
         overall distance to track current bearing, distance, and current location.
         '''
         self.update()
-
-if __name__ == '__main__':
-    import sys
-
-    app = QApplication(sys.argv)
-    window = Tracker(
-        'location', 
-        ref=(38.0, -120.0), 
-        scale=131.5, 
-        units='km'
-    )
-    sys.exit(app.exec_())

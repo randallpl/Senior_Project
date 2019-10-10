@@ -9,15 +9,14 @@ from functools import partial
 import requests
 
 import Tracker
-from Table import Table
 from Windows import *
+from CustomQtObjects import Table
 
 class MainWindow(QMainWindow):
     def __init__(self, projectName, parent, reference=None, createdDate=None, openExisting=False):
         super(MainWindow, self).__init__(parent)
         self.setFixedSize(1080, 768)
         self.projectName = projectName
-        self.table = Table(self)
         self.scale = None
         self.reference = reference
         self.units = None
@@ -25,7 +24,12 @@ class MainWindow(QMainWindow):
         self.savedPoints = []
         self.createdDate = createdDate
         self.api = None
-        
+
+        #Open existing json file containing all data
+        if openExisting:
+            self.openExistingProject(self.projectName)
+
+        #----------------------Menu Bar-----------------------#
         menubar = self.menuBar()
         self.fileMenu = menubar.addMenu('File')
 
@@ -55,7 +59,7 @@ class MainWindow(QMainWindow):
         self.menuExit.triggered.connect(self.closeApplication)
         
         self.menuExport = QMenu('Export', self)
-        self.menuExport.setEnabled(False)
+        self.menuExport.setEnabled(self.points != None)
         
         self.exportCSV = QAction('CSV', self)
         self.menuExport.addAction(self.exportCSV)
@@ -72,6 +76,13 @@ class MainWindow(QMainWindow):
         self.exportHTML = QAction('HTML', self)
         self.menuExport.addAction(self.exportHTML)
         self.exportHTML.triggered.connect(self.exportToHTML)
+
+        self.fileMenu.addAction(self.menuNew)
+        self.fileMenu.addAction(self.menuOpen)
+        self.fileMenu.addAction(self.menuSave)
+        self.fileMenu.addMenu(self.menuExport)
+        self.fileMenu.addAction(self.menuClose)
+        self.fileMenu.addAction(self.menuExit)
 
         self.settingsMenu = menubar.addMenu('Settings')
 
@@ -109,24 +120,54 @@ class MainWindow(QMainWindow):
         self.menuTheme.addAction(self.themeDefault)
         self.themeDefault.triggered.connect(partial(self.parent().loadTheme))
 
-        self.fileMenu.addAction(self.menuNew)
-        self.fileMenu.addAction(self.menuOpen)
-        self.fileMenu.addAction(self.menuSave)
-        self.fileMenu.addMenu(self.menuExport)
-        self.fileMenu.addAction(self.menuClose)
-        self.fileMenu.addAction(self.menuExit)
-
         self.settingsMenu.addAction(self.menuMouseSettings)
         self.settingsMenu.addAction(self.menuProjectSettings)
         self.settingsMenu.addAction(self.menuAPISettings)
 
         self.viewMenu.addMenu(self.menuTheme)
 
-        self.setCentralWidget(self.table)
+        #----------------------Central Widget-----------------------#
+        self.cWidget = QWidget()
 
-        #Open existing json file containing all data
-        if openExisting:
-            self.openExistingProject(self.projectName)
+        mainLayout = QVBoxLayout()
+
+        self.table = Table(
+            'Points', 
+            self.points, 
+            columns=['Latitude', 'Longitude', 'Date', 'Description'],
+            index=True)
+
+        #create horizontal window for storing buttons
+        hLayout = QHBoxLayout()
+
+        #Add refrence button and connect it to referenceWindow()
+        self.addRefButton = Button('Add Reference')
+        self.addRefButton.clicked.connect(self.referenceWindow)
+        
+        #Add scale button and connect it to scaleTracker()
+        self.setScaleButton = Button('Set Scale')
+        self.setScaleButton.clicked.connect(self.scaleTracker)
+
+        #Add locate button and connect it locationTracker()
+        self.locateButton = Button('Locate Point')
+        self.locateButton.clicked.connect(self.locationTracker)
+
+        #Add Plot button and connect it to plotPoints()
+        self.plotButton = Button('Plot')
+        self.plotButton.clicked.connect(self.plotPoints)
+
+        #Add all button to horizontal layout
+        hLayout.addWidget(self.addRefButton)
+        hLayout.addWidget(self.setScaleButton)
+        hLayout.addWidget(self.locateButton)
+        hLayout.addWidget(self.plotButton)
+
+        mainLayout.addWidget(self.table)
+        mainLayout.addLayout(hLayout)
+
+        self.cWidget.setLayout(mainLayout)
+
+        self.setCentralWidget(self.cWidget)
 
         self.setWindowTitle(f'Map Reader - {self.projectName}')
         self.show()
@@ -307,10 +348,6 @@ class MainWindow(QMainWindow):
             self.points = data.get('Points')
             self.api = data.get('APIKey')
 
-        if self.points:
-            self.menuExport.setEnabled(True)
-            self.table.update(self.points)
-
     def closeApplication(self):
         '''
         Prompt user when exiting
@@ -399,7 +436,7 @@ class MainWindow(QMainWindow):
         '''
         Delete row from table and self.points list
         '''
-        row = self.table.getRowIndex()
+        row = self.table.getSelectedRowIndex()
         
         if row is False:
             return

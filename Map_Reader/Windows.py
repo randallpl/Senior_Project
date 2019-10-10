@@ -383,6 +383,7 @@ class APIKeyWindow(QDialog):
         self.setWindowTitle('Enter API Key')
         self.setAttribute(Qt.WA_QuitOnClose, False)
         self.setModal(True)
+        self.resize(400, 150)
         self.initUI()
 
     def initUI(self):
@@ -555,6 +556,26 @@ class MapWindow(QDialog):
     @pyqtSlot(result=str)
     def getAPIKey(self):
         return self.api  
+
+'''
+About Window Class Containing Info About Project
+'''
+class AboutWindow(QDialog):
+    def __init__(self):
+        super(AboutWindow, self).__init__()
+        self.setFixedSize(240,180)
+        self.setWindowTitle('About This Project')
+        self.initUI()
+    
+    def initUI(self):
+        self.aboutlayout = QVBoxLayout()
+        self.textbox = QLabel()
+        self.textbox.setAlignment(Qt.AlignLeft)
+        self.textbox.setWordWrap(True)
+        self.textbox.setText('This project is was made by Evan Brittain, Gabriel Aguirre, Ryan Swearingen, Randall Plant, and Blake Carlisle.  More to follow...')
+        self.aboutlayout.addWidget(self.textbox)
+        self.setLayout(self.aboutlayout)
+        self.show()
 
 if __name__=='__main__':
     import sys
