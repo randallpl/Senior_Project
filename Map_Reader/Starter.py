@@ -197,7 +197,7 @@ class StarterWindow(QDialog):
 
     
     def getProjects(self):
-        return [{'Projects': f.name} for f in os.scandir('./Projects') if f.is_dir()]
+        return [f.name for f in os.scandir('./Projects') if f.is_dir()]
 
     def starterScreen(self, closeMW=False):
         '''
