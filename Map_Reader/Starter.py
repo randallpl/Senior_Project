@@ -43,10 +43,12 @@ class StarterWindow(QDialog):
         #horizontal layout containing new and open buttons
         hLayout = QHBoxLayout()
         self.projectTable = Table('Projects', self.getProjects(), columns=['Projects'])
+        #self.projectTable.doubleClicked.connect(self.openSpecificP)
         
+
         self.newButton = Button('New')
         self.newButton.clicked.connect(self.newProject)
-
+        
         self.openButton = Button('Open')
         self.openButton.clicked.connect(self.openProject)
 
@@ -185,6 +187,7 @@ class StarterWindow(QDialog):
                     self,
                     'Invalid Project',
                     f'{filename} is an invalid project')
+
     
     def getProjects(self):
         return [{'Projects': f.name} for f in os.scandir('./Projects') if f.is_dir()]
@@ -208,6 +211,11 @@ class StarterWindow(QDialog):
         Show About Screen
         '''
         self.aboutScreen = AboutWindow()
+
+    def mouseDoubleClickEvent(self, ev: QtGui.QMouseEvent):
+        # super(VQMemoryCanvas, self).mouseDoubleClickEvent(ev)
+        print("double click")
+        
 
 if __name__ == '__main__':
 
