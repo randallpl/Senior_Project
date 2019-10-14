@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import (QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt,
         QTime, QModelIndex, QSize)
+from PyQt5 import QtGui
 from PyQt5.QtGui import QStandardItemModel, QIcon
 
 class Button(QPushButton):
@@ -35,7 +36,7 @@ class LineEdit(QLineEdit):
         QLineEdit.focusOutEvent(self, event)
         self.setGraphicsEffect(None)
 
-class Table(QWidget):
+class Table(QTableWidget):
     def __init__(self, name, data, columns=None, index=False, sortCol=None, parent=None):
         super(Table, self).__init__(parent)
 
@@ -56,15 +57,15 @@ class Table(QWidget):
         self.sortBy(sortCol)
 
     def initUI(self):
-        '''
-        Layout UI elements of table
-        '''
+     #  Layout UI elements of table
+        
         mainLayout = QVBoxLayout()
 
         self.proxyModel = QSortFilterProxyModel()
         self.proxyModel.setDynamicSortFilter(True)
 
         self.sourceModel = QStandardItemModel(0, len(self.columns), self)
+        
         for i, column in enumerate(self.columns):
             self.sourceModel.setHeaderData(i, Qt.Horizontal, column)
 
@@ -87,7 +88,8 @@ class Table(QWidget):
         mainLayout.addWidget(self.proxyGroupBox)
         self.setLayout(mainLayout)
         self.update(self.data)
-
+        
+    
     def setSourceModel(self, model):
         self.proxyModel.setSourceModel(model)
 
@@ -138,3 +140,5 @@ class Table(QWidget):
             return self.proxyView.selectedIndexes()[0].row()
         except:
             return False
+ 
+#class StarterTable(QTableWidget):

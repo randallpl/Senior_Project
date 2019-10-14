@@ -39,11 +39,17 @@ class StarterWindow(QDialog):
         Setup GUI elements of scale window
         '''
         mainLayout = QVBoxLayout()
-
+        data = self.getProjects()
         #horizontal layout containing new and open buttons
         hLayout = QHBoxLayout()
-        self.projectTable = Table('Projects', self.getProjects(), columns=['Projects'])
-        #self.projectTable.doubleClicked.connect(self.openSpecificP)
+        self.projectTable = QTableWidget(self)
+        self.projectTable.setHorizontalHeaderLabels(["TEST", "PROJECT"])
+        self.projectTable.setRowCount(len(data))
+        self.projectTable.setColumnCount(1)
+        for i in range(len(data)):
+            entry = str(data[i])
+            self.projectTable.setItem(i,0, QTableWidgetItem(entry))
+        self.projectTable.cellDoubleClicked.connect(self.openProjectDC)
         
 
         self.newButton = Button('New')
@@ -110,7 +116,8 @@ class StarterWindow(QDialog):
         Send reference point back to main window to be stored
         '''
         self.newProjectWizard = NewProjectWizard(self)
-        
+    def openProjectDC(self):
+        print("test")    
 
     def createProject(self, projectName, refPoint):
         '''
