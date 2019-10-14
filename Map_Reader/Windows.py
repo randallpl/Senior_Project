@@ -572,10 +572,19 @@ class AboutWindow(QDialog):
         self.textbox = QLabel()
         self.textbox.setAlignment(Qt.AlignLeft)
         self.textbox.setWordWrap(True)
-        self.textbox.setText('This project is was made by Evan Brittain, Gabriel Aguirre, Ryan Swearingen, Randall Plant, and Blake Carlisle.  More to follow...')
+        self.textbox.setText('This project is was made by Evan Brittain, Gabriel Aguirre, Joseph Donati, Ryan Swearingen, Randall Plant, and Blake Carlisle.  More to follow...')
         self.aboutlayout.addWidget(self.textbox)
+        self.cancelButton = Button('Cancel')
+        self.cancelButton.clicked.connect(self.cancel)
+        self.aboutlayout.addWidget(self.cancelButton)
         self.setLayout(self.aboutlayout)
         self.show()
+
+    def cancel(self):
+        '''
+        Return to mouse tracker screen if cancel button is clicked
+        '''
+        self.close()
 
 if __name__=='__main__':
     import sys
