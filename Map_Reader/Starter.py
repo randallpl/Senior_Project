@@ -43,15 +43,31 @@ class StarterWindow(QDialog):
         #horizontal layout containing new and open buttons
         hLayout = QHBoxLayout()
         self.projectTable = QTableWidget(self)
-        self.projectTable.resizeColumnsToContents()
-        self.projectTable.setHorizontalHeaderLabels(["TEST", "PROJECT"])
+        
+        
         self.projectTable.setRowCount(len(data))
-        self.projectTable.setColumnCount(1)
+        self.projectTable.setColumnCount(2)
+        
         for i in range(len(data)):
             entry = str(data[i])
+            try:
+                with open(f'./Projects/{entry}/project_data.json', 'r') as f:
+                    projectData = json.loads(f.read())
+            except:
+                QMessageBox.critical(
+                    self,
+                '   File Not Found',
+                    f'{entry} is not supported')
+            else:
+            
+                self.points = projectData.get('Points')
             self.projectTable.setItem(i,0, QTableWidgetItem(entry))
+            self.projectTable.setItem(i,1, QTableWidgetItem(str(len(self.points))))
+            
         self.projectTable.cellDoubleClicked.connect(self.openProjectDC)
-        
+        self.projectTable.setHorizontalHeaderLabels(["PROJECTS", "NoPOINTS"])
+        #self.projectTable.itemDoubleClicked(self.projectTable.horizontalHeader).connect(self.orderTable)
+        self.projectTable.resizeRowsToContents()
 
         self.newButton = Button('New')
         self.newButton.clicked.connect(self.newProject)
@@ -121,8 +137,7 @@ class StarterWindow(QDialog):
         item = self.projectTable.currentItem()
         
         projectName = item.text()
-        print("Row %d and Column %d was clicked" % (row, column))
-        print(projectName)
+        
         self.hide()
 
         self.mw = MainWindow(projectName, self, openExisting=True)
@@ -229,7 +244,10 @@ class StarterWindow(QDialog):
 
     def mouseDoubleClickEvent(self, ev: QtGui.QMouseEvent):
         # super(VQMemoryCanvas, self).mouseDoubleClickEvent(ev)
+     
         print("double click")
+    def orderTable(self):
+        print("header clicked")
         
 
 if __name__ == '__main__':
