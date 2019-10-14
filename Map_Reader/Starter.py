@@ -43,6 +43,7 @@ class StarterWindow(QDialog):
         #horizontal layout containing new and open buttons
         hLayout = QHBoxLayout()
         self.projectTable = QTableWidget(self)
+        self.projectTable.resizeColumnsToContents()
         self.projectTable.setHorizontalHeaderLabels(["TEST", "PROJECT"])
         self.projectTable.setRowCount(len(data))
         self.projectTable.setColumnCount(1)
@@ -116,8 +117,15 @@ class StarterWindow(QDialog):
         Send reference point back to main window to be stored
         '''
         self.newProjectWizard = NewProjectWizard(self)
-    def openProjectDC(self):
-        print("test")    
+    def openProjectDC(self, row, column):
+        item = self.projectTable.currentItem()
+        
+        projectName = item.text()
+        print("Row %d and Column %d was clicked" % (row, column))
+        print(projectName)
+        self.hide()
+
+        self.mw = MainWindow(projectName, self, openExisting=True)
 
     def createProject(self, projectName, refPoint):
         '''
