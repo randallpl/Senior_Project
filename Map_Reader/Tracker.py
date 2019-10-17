@@ -1,10 +1,11 @@
 import sys
 from PyQt5.QtCore import Qt, QDateTime
-from PyQt5.QtWidgets import QGridLayout, QLabel, QApplication, QDialog
+from PyQt5.QtWidgets import QGridLayout, QLabel, QApplication, QDialog, QMessageBox
 from PyQt5.QtGui import QCursor, QFont
 from geopy.distance import geodesic
 from collections import namedtuple
 import math
+from statistics import mean
 
 from MouseController import MouseController
 
@@ -30,6 +31,11 @@ class Tracker(QDialog):
         self.hidden = hidden
         self.scale = scale
         self.units = units
+        
+        if self.mode == 'location':
+            self.refIter = iter(ref)
+            self.currentRef = next(self.refIter)
+            self.traceData = []
 
         self.mouseController = MouseController()
         self.origMouseSpeed = self.mouseController.getSpeed()
@@ -40,7 +46,7 @@ class Tracker(QDialog):
         self.cursor = QCursor()
         self.initUI()
         
-        
+    
     def initUI(self):
         '''
         Setup GUI elements of mouse tracker screen.
@@ -225,12 +231,15 @@ class Tracker(QDialog):
         results += f'\tDistance_px: {self.dist_px}\n'
 
         if self.mode == 'location':
-            results += f'\n\tReference: {self.ref}\n'
+            results += f'\n\tReference: {self.currentRef}\n'
             results += f'\tBearing: {self.bearing}\n'
             results += f'\tDistance_{self.units}: {self.dist}\n'
             results += f'\tNew Location: {self.newLoc.x, self.newLoc.y}'
 
         self.label.setText(results)
+
+    def averageData(self):
+        print(self.traceData)
 
     def update(self):
         '''
@@ -248,7 +257,7 @@ class Tracker(QDialog):
         if self.mode == 'location':
             self.bearing = self.getBearing(self.dx + dx_px, self.dy + dy_px)
             self.dist = self.convert(self.dist_px, self.scale)
-            self.newLoc = self.newLocation(self.ref, self.dist, self.bearing)
+            self.newLoc = self.newLocation(self.currentRef, self.dist, self.bearing)
             
         #Check if cursor is within window boundaries
         #Only update dx, dy instance variables when border has been reached
@@ -286,6 +295,7 @@ class Tracker(QDialog):
         When mouse is released cursor type will be reset or shown
         again if hidden.
         '''
+
         #restore cursor type and zero out variables
         QApplication.restoreOverrideCursor()
 
@@ -294,15 +304,35 @@ class Tracker(QDialog):
 
         #Reset mouse acceleration
         self.mouseController.setAcceleration(self.origAcceleration)
-
+        
+        if self.mode == 'scale':
+            self.parent().confirmScale(self.dist_px)
+            return
+        else:
+            data = {
+                'Reference': (self.currentRef[0], self.currentRef[1]),
+                'DX': self.dx,
+                'DY': self.dy,
+                'Distance_PX': self.dist_px,
+                'Distance_Actual': self.dist,
+                'Bearing': self.bearing,
+                'New_Lat': self.newLoc[0],
+                'New_Lon': self.newLoc[1],
+                'Units': self.units 
+            }
+            self.traceData.append(data)
+        
+        try:
+            self.currentRef = next(self.refIter)  
+            QMessageBox.critical(
+                self,
+                'Invalid Project',
+                f'{self.currentRef} is an invalid project'
+            )     
+        except StopIteration:
         #Call function to launch windown depending on scale or location mode
-        if self.parent():
-            if self.mode == 'scale':
-                self.parent().confirmScale(self.dist_px)
-            else:
-                self.parent().confirmLocation(self.newLoc.x, self.newLoc.y, self.dist, self.bearing, self.units)
-
-        self.zeroVariables()
+            self.averageData()
+            self.parent().confirmLocation(self.newLoc.x, self.newLoc.y, self.dist, self.bearing, self.units)           
         
     def mouseMoveEvent(self, e):
         '''
@@ -311,3 +341,10 @@ class Tracker(QDialog):
         overall distance to track current bearing, distance, and current location.
         '''
         self.update()
+if __name__ == '__main__':
+
+    import sys
+
+    app = QApplication(sys.argv)
+    window = Tracker('location', ref=[(1, 2), (3, 4), (5, 6)], scale=100, units='km')
+    sys.exit(app.exec_())
