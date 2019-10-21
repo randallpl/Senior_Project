@@ -120,4 +120,4 @@ class WizardDataPage(QWizardPage):
         lat = eval(self.latLineEdit.text())
         lon = eval(self.lonLineEdit.text())
 
-        return lat, lon
+        return [(lat, lon)]

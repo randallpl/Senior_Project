@@ -201,7 +201,7 @@ class MainWindow(QMainWindow):
         '''
         Sets the local reference variable with point data passed from reference window
         '''
-        self.reference = point
+        self.reference.append(point)
         self.saveFile()
 
     def scaleTracker(self):
