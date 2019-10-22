@@ -61,7 +61,7 @@ class Tracker(QDialog):
         self.label.setFont(font)          
         grid.addWidget(self.label, 0, 0, Qt.AlignTop)
         self.setLayout(grid)
-        self.updateLabel(0, 0)
+        self.updateLabel()
 
         self.setWindowTitle(self.mode)
         self.setModal(True)
@@ -218,17 +218,19 @@ class Tracker(QDialog):
         '''
         self.dx = 0
         self.dy = 0
+        self.temp_dx = 0
+        self.temp_dy = 0
         self.dist = 0
         self.dist_px = 0
         self.bearing = 0
         self.newLoc = Point(0, 0)
 
-    def updateLabel(self, dx_px, dy_px):
+    def updateLabel(self):
         '''
         Constantly update data on window label
         '''
-        results = f'\n\tdx_px: {self.dx + dx_px}\n'
-        results += f'\tdy_px: {self.dy + dy_px}\n'
+        results = f'\n\tdx_px: {self.dx + self.temp_dx}\n'
+        results += f'\tself.temp_dy: {self.dy + self.temp_dy}\n'
         results += f'\tDistance_px: {self.dist_px}\n'
 
         if self.mode == 'location':
@@ -261,12 +263,12 @@ class Tracker(QDialog):
         center = self.getCenter()
         
         #Get current x, y, and straight line distance from center
-        dx_px = self.getDX()
-        dy_px = self.getDY()
-        self.dist_px = self.getDistance(self.dx + dx_px, self.dy + dy_px)
+        self.temp_dx = self.getDX()
+        self.temp_dy = self.getDY()
+        self.dist_px = self.getDistance(self.dx + self.temp_dx, self.dy + self.temp_dy)
 
         if self.mode == 'location':
-            self.bearing = self.getBearing(self.dx + dx_px, self.dy + dy_px)
+            self.bearing = self.getBearing(self.dx + self.temp_dx, self.dy + self.temp_dy)
             self.dist = self.convert(self.dist_px, self.scale)
             self.newLoc = self.newLocation(self.currentRef, self.dist, self.bearing)
             
@@ -276,11 +278,11 @@ class Tracker(QDialog):
         boundaries = {0, geo.width()-1, geo.height()-1}
 
         if curLoc.intersection(boundaries):
-            self.dx += dx_px
-            self.dy += dy_px
+            self.dx += self.temp_dx
+            self.dy += self.temp_dy
             cur.setPos(center.x, center.y)
 
-        self.updateLabel(dx_px, dy_px)
+        self.updateLabel()
         
     def mousePressEvent(self, e):
         '''
@@ -306,6 +308,9 @@ class Tracker(QDialog):
         When mouse is released cursor type will be reset or shown
         again if hidden.
         '''
+        #update net dx, dy one more time
+        self.dx += self.temp_dx
+        self.dy += self.temp_dy
 
         #restore cursor type and zero out variables
         QApplication.restoreOverrideCursor()
@@ -357,5 +362,5 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
-    window = Tracker('location', ref=[(0, 0), (0, 0)], scale=100, units='km')
+    window = Tracker('location', ref=[(0, 0), (1, 1)], scale=100, units='km')
     sys.exit(app.exec_())
