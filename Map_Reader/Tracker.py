@@ -6,8 +6,9 @@ from geopy.distance import geodesic
 from collections import namedtuple
 import math
 from statistics import mean
-
 from MouseController import MouseController
+import numpy as np
+import pandas as pd
 
 #Dependencies
 #PyQt5: conda install -c anaconda pyqt 
@@ -131,7 +132,7 @@ class Tracker(QDialog):
             Total distance
         '''
         try:
-            return round(math.sqrt(dx**2 + dy**2), 4)
+            return round(math.sqrt(dx**2 + dy**2), 6)
         except:
             return 0
 
@@ -158,7 +159,7 @@ class Tracker(QDialog):
             #shift bearing so 0 degrees is now grid north
             bearing = (360 + (90 - bearing)) % 360
 
-            return round(bearing, 4)
+            return round(bearing, 6)
     
     def convert(self, dist, scale):
         '''
@@ -180,7 +181,7 @@ class Tracker(QDialog):
             return 1
 
         else:
-            return round(convDist, 4)
+            return round(convDist, 6)
     
     def newLocation(self, ref, dist, bearing):
         '''
@@ -238,8 +239,18 @@ class Tracker(QDialog):
 
         self.label.setText(results)
 
-    def averageData(self):
-        print(self.traceData)
+    def averageData(self, circle=False):
+        '''
+        Averaging master function
+        '''
+        if circle == True:
+            return
+        else:
+            df = pd.DataFrame(self.traceData, columns=['Reference', 'DX', 'DY', 'Distance_PX', 'Distance_Actual', 'Bearing', 'New_Lat', 'New_Lon', 'Units'])
+            print(df)
+            self.newLoc = Point(df["New_Lat"].mean(), df["New_Lon"].mean())
+            #bearing means nothing with multiple reference points... drop?
+            #distance means nothing with multiple reference points... drop?
 
     def update(self):
         '''
@@ -321,16 +332,15 @@ class Tracker(QDialog):
                 'Units': self.units 
             }
             self.traceData.append(data)
-        
+            self.zeroVariables()
         try:
             self.currentRef = next(self.refIter)  
-            QMessageBox.critical(
-                self,
-                'Invalid Project',
-                f'{self.currentRef} is an invalid project'
-            )     
+            '''QMessageBox.critical(
+                #self,
+                #'Invalid Project',
+                #f'{self.currentRef} is an invalid project'
+            )'''     
         except StopIteration:
-        #Call function to launch windown depending on scale or location mode
             self.averageData()
             self.parent().confirmLocation(self.newLoc.x, self.newLoc.y, self.dist, self.bearing, self.units)           
         
@@ -341,10 +351,11 @@ class Tracker(QDialog):
         overall distance to track current bearing, distance, and current location.
         '''
         self.update()
+
 if __name__ == '__main__':
 
     import sys
 
     app = QApplication(sys.argv)
-    window = Tracker('location', ref=[(1, 2), (3, 4), (5, 6)], scale=100, units='km')
+    window = Tracker('location', ref=[(0, 0), (0, 0)], scale=100, units='km')
     sys.exit(app.exec_())
