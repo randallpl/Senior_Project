@@ -182,6 +182,14 @@ class Tracker(QDialog):
 
         else:
             return round(convDist, 6)
+
+    def convertEuclidean(self, refx, refy, endx, endy):
+        '''
+        Convert reference point (lat, long) and new point (lat, long) to euclidian distance in (lat, long)
+        '''
+        actualx = endx - refx
+        actualy = endy - refy
+        return round(np.sqrt(actualx**2 + actualy**2), 6)
     
     def newLocation(self, ref, dist, bearing):
         '''
@@ -210,7 +218,7 @@ class Tracker(QDialog):
         elif self.units == 'ft':
             coords = geodesic(feet=dist).destination(ref, bearing)
     
-        return Point(round(coords.latitude, 5), round(coords.longitude, 5))
+        return Point(round(coords.latitude, 6), round(coords.longitude, 6))
     
     def zeroVariables(self):
         '''
@@ -246,13 +254,78 @@ class Tracker(QDialog):
         Averaging master function
         '''
         if circle == True:
+            df = pd.DataFrame(self.traceData, columns=['Reference', 'New_Lat', 'New_Lon'])
+            df[['Reference_x', 'Reference_y']] = pd.DataFrame(df['Reference'].tolist(), index=df.index)
+            df.drop('Reference', axis=1, inplace=True)
+            df = df[['Reference_x', 'Reference_y', 'New_Lat', 'New_Lon']]
+            df['Euclidean_Dist'] = self.convertEuclidean(df['Reference_x'], df['Reference_y'], df['New_Lat'], df['New_Lon'])
+            df.drop(['New_Lat', 'New_Lon'], axis=1, inplace=True)
+            final = []
+            for row1 in df.itertuples(index=False):
+                for row2 in df.itertuples(index=False):
+                    dx = row2.Reference_x - row1.Reference_x
+                    dy = row2.Reference_y - row1.Reference_y
+                    d = math.sqrt((dx**2 + dy**2))
+                    if row1 == row2:
+                        print("Same Circle!")
+                        continue
+                    if d >= (row2.Euclidean_Dist + row1.Euclidean_Dist):
+                        #Sure of this formula, derived it myself
+                        print("Circles do not meet or meet at exactly 1 point!")
+                        temp1X = row2.Reference_x + row2.Euclidean_Dist * ((row1.Reference_x - row2.Reference_x)/d)
+                        temp1Y = row2.Reference_y + row2.Euclidean_Dist * ((row1.Reference_y - row2.Reference_y)/d)
+                        temp2X = row1.Reference_x + row1.Euclidean_Dist * ((row2.Reference_x - row1.Reference_x)/d)
+                        temp2Y = row1.Reference_y + row1.Euclidean_Dist * ((row2.Reference_y - row1.Reference_y)/d)
+                        data1 = {
+                            'New_Lat': temp1X,
+                            'New_Lon': temp1Y
+                        }
+                        data2 = {
+                            'New_Lat': temp2X,
+                            'New_Lon': temp2Y
+                        }
+                        final.append(data1)
+                        final.append(data2)
+                    elif d > abs(row2.Euclidean_Dist - row1.Euclidean_Dist):
+                        #Unsure of this formula, pulled it from online, needs testing
+                        print("Circles meet at exactly 2 points!")
+                        centerDist = ((row1.Euclidean_Dist**2 - row2.Euclidean_Dist**2 + d**2)/(2.0 * d))
+                        centerX = row1.Reference_x + (dx * (centerDist/d))
+                        centerY = row1.Reference_y + (dy * (centerDist/d))
+                        height = math.sqrt(row2.Euclidean_Dist**2 - centerDist**2)
+                        temp1X = centerX + (-1) * dy * (height/d)
+                        temp1Y = centerY + dx * (height/d)
+                        temp2X = centerX - (-1) * dy * (height/d)
+                        temp2Y = centerY - dx * (height/d)
+                        data1 = {
+                            'New_Lat': temp1X,
+                            'New_Lon': temp1Y
+                        }
+                        data2 = {
+                            'New_Lat': temp2X,
+                            'New_Lon': temp2Y
+                        }
+                        final.append(data1)
+                        final.append(data2)
+                    else:
+                        print("Error! One circle is completely inside another.  Cannot perform calculation!")
+                        return
+            finaldf = pd.DataFrame(final, columns=['New_Lat','New_Lon'])
+            print(finaldf)
+            self.newLoc = Point(round(finaldf["New_Lat"].mean(), 6), round(finaldf["New_Lon"].mean(), 6))
+            #bearing means nothing with multiple reference points... drop?
+            #distance means nothing with multiple reference points... drop?
             return
         else:
             df = pd.DataFrame(self.traceData, columns=['Reference', 'DX', 'DY', 'Distance_PX', 'Distance_Actual', 'Bearing', 'New_Lat', 'New_Lon', 'Units'])
+            df[['Reference_x', 'Reference_y']] = pd.DataFrame(df['Reference'].tolist(), index=df.index)
+            df.drop('Reference', axis=1, inplace=True)
+            df = df[['Reference_x', 'Reference_y', 'DX', 'DY', 'Distance_PX', 'Distance_Actual', 'Bearing', 'New_Lat', 'New_Lon', 'Units']]
             print(df)
-            self.newLoc = Point(df["New_Lat"].mean(), df["New_Lon"].mean())
+            self.newLoc = Point(round(df["New_Lat"].mean(), 6), round(df["New_Lon"].mean(), 6))
             #bearing means nothing with multiple reference points... drop?
             #distance means nothing with multiple reference points... drop?
+            return
 
     def update(self):
         '''
@@ -346,7 +419,7 @@ class Tracker(QDialog):
                 #f'{self.currentRef} is an invalid project'
             )'''     
         except StopIteration:
-            self.averageData()
+            self.averageData(circle=True)
             self.parent().confirmLocation(self.newLoc.x, self.newLoc.y, self.dist, self.bearing, self.units)           
         
     def mouseMoveEvent(self, e):
@@ -362,5 +435,5 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
-    window = Tracker('location', ref=[(0, 0), (1, 1)], scale=100, units='km')
+    window = Tracker('location', ref=[(0,0), (1,2), (2,0)], scale=100, units='km')
     sys.exit(app.exec_())
