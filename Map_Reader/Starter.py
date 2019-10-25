@@ -19,8 +19,8 @@ class StarterWindow(QDialog):
         
         qApp.setWindowIcon(QtGui.QIcon('./Resources/icons/app_icon.png'))
 
-        self.setFixedSize(300, 400)
-        self.setWindowTitle('Welcome')
+        self.setFixedSize(500, 600)
+        self.setWindowTitle('Welcome to MapReader')
         self.mw = None
         self.newProjectWizard = None
         self.aboutWindow = None

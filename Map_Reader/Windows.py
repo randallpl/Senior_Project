@@ -563,7 +563,7 @@ About Window Class Containing Info About Project
 class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
-        self.setFixedSize(240,180)
+        self.setFixedSize(300,250)
         self.setWindowTitle('About This Project')
         self.initUI()
     
@@ -572,7 +572,7 @@ class AboutWindow(QDialog):
         self.textbox = QLabel()
         self.textbox.setAlignment(Qt.AlignLeft)
         self.textbox.setWordWrap(True)
-        self.textbox.setText('This project is was made by Evan Brittain, Gabriel Aguirre, Joseph Donati, Ryan Swearingen, Randall Plant, and Blake Carlisle.  More to follow...')
+        self.textbox.setText('Authors: \n\tEvan Brittain\n\tGabriel Aguirre\n\tJoseph Donati\n\tRyan Swearingen\n\tRandall Plant\n\tBlake Carlisle\n\nVersion:  1.0')
         self.aboutlayout.addWidget(self.textbox)
         self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)

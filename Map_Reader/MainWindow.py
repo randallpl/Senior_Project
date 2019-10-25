@@ -116,6 +116,10 @@ class MainWindow(QMainWindow):
         self.menuTheme.addAction(self.themeGreen)
         self.themeGreen.triggered.connect(partial(self.parent().loadTheme, 'Green'))
 
+        self.themeTest = QAction('Test', self)
+        self.menuTheme.addAction(self.themeTest)
+        self.themeTest.triggered.connect(partial(self.parent().loadTheme, 'Test'))
+
         self.themeDefault = QAction('Default', self)
         self.menuTheme.addAction(self.themeDefault)
         self.themeDefault.triggered.connect(partial(self.parent().loadTheme))
