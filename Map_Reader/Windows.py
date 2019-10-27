@@ -166,7 +166,7 @@ class ReferenceWindow(QDialog):
         lon = eval(self.lonEdit.text())
         
         #check values entered by user are correct
-        if lat > -90 and lat < 90 and lon > -180 and lon < 180:
+        if lat >= -90 and lat <= 90 and lon >= -180 and lon <= 180:
 
             if self.parent():
                 self.parent().setReference((lat, lon))
@@ -226,8 +226,6 @@ class LocationWindow(QDialog):
         mainLayout.addLayout(hLayout)
         mainLayout.addWidget(self.descBox)
         mainLayout.addLayout(h2Layout)
-
-        self.mandatoryFields = [self.latEdit, self.lonEdit]
     
         self.setLayout(mainLayout)
         self.setModal(True)
@@ -237,8 +235,7 @@ class LocationWindow(QDialog):
         '''
         Check if all mandatory fields are entered
         '''
-
-        if all(t.text() for t in self.mandatoryFields):
+        if self.latEdit.text() and self.lonEdit.text():
             self.saveButton.setEnabled(True)
         else:
             self.saveButton.setEnabled(False)
@@ -251,7 +248,6 @@ class LocationWindow(QDialog):
             'Description': self.desc
         }
 
-
     def save(self):
         '''
         Send scale and unit values entered by user back to mouse mainwindow
@@ -263,14 +259,7 @@ class LocationWindow(QDialog):
         self.desc = self.descBox.toPlainText()
         
         #check values entered by user are correct
-        upperBound = [90, 180]
-        lowerBound = [-90, -180]
-        fieldVals = [self.lat, self.lon]
-
-        upperCheck = all(field < limit for field, limit in zip(fieldVals, upperBound))
-        lowerCheck = all(field >= limit for field, limit in zip(fieldVals, lowerBound))
-
-        if upperCheck and lowerCheck:
+        if self.lat >= -90 and self.lat <= 90 and self.lon >= -180 and self.lon <= 180:
             self.accept()
             self.close()
 
