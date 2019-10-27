@@ -74,29 +74,31 @@ class ScaleWindow(QDialog):
         else:
             self.saveButton.setEnabled(False)
 
+    def getConfirmedData(self):
+        return self.pxPerUnit, self.units
+
     def save(self):
         '''
         Send scale and unit values entered by user back to mouse tracker
         screen when save button is clicked.
         '''
         #Get text values from each element
-        scale = eval(self.scaleEdit.text())
-        dist_px = eval(self.pixelEdit.text())
-        units = self.comboBox.currentText()
+        self.scale = eval(self.scaleEdit.text())
+        self.dist_px = eval(self.pixelEdit.text())
+        self.units = self.comboBox.currentText()
+
+        self.pxPerUnit = self.dist_px / self.scale
         
         #check values entered by user are correct
-        
-        if scale > 0 and dist_px > 0:
-            pxPerUnit = dist_px / scale
-            if self.parent():
-                self.parent().setScale(pxPerUnit, units) 
-
+        if self.scale > 0 and self.dist_px > 0:
+            self.accept() 
             self.close()
 
     def cancel(self):
         '''
         Return to mouse tracker screen if cancel button is clicked
         '''
+        self.reject()
         self.close()
         
 #Class to confirm the reference point data
@@ -157,25 +159,27 @@ class ReferenceWindow(QDialog):
         else:
             self.saveButton.setEnabled(False)
 
+    def getConfirmedData(self):
+        return self.lat, self.lon
+
     def save(self):
         '''
         Send reference point back to main window to be stored
         '''
         #Get text values from each element
-        lat = eval(self.latEdit.text())
-        lon = eval(self.lonEdit.text())
+        self.lat = eval(self.latEdit.text())
+        self.lon = eval(self.lonEdit.text())
         
         #check values entered by user are correct
-        if lat >= -90 and lat <= 90 and lon >= -180 and lon <= 180:
-
-            if self.parent():
-                self.parent().setReference((lat, lon))
+        if self.lat >= -90 and self.lat <= 90 and self.lon >= -180 and self.lon <= 180:
+            self.accept()
             self.close()
 
     def cancel(self):
         '''
         Return to mouse tracker screen if cancel button is clicked
         '''
+        self.reject()
         self.close()
         
 #Class to confirm lat, lon data

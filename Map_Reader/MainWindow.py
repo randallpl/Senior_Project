@@ -196,13 +196,10 @@ class MainWindow(QMainWindow):
         Displays window to enter lat/lon of reference point
         '''
         self.refWindow = ReferenceWindow(self)
-
-    def setReference(self, point):
-        '''
-        Sets the local reference variable with point data passed from reference window
-        '''
-        self.reference.append(point)
-        self.saveFile()
+        if self.refWindow.exec_():
+            point = self.refWindow.getConfirmedData()
+            self.reference.append(point)
+            self.saveFile()
 
     def scaleTracker(self):
         '''
@@ -215,15 +212,12 @@ class MainWindow(QMainWindow):
         Launches window to confirm scale data
         '''
         self.scaleConfirm = ScaleWindow(dist_px, self)
-
-    def setScale(self, scale, units):
-        '''
-        Sets Scale and unit input passed from scale window
-        '''
-        self.scale = scale
-        self.units = units
-        self.saveFile()
-        self.scaleTracker.close()
+        if self.scaleConfirm.exec_():
+            self.scale, self.units = self.scaleConfirm.getConfirmedData()
+            self.saveFile()
+            self.scaleTracker.close()
+        else:
+            self.scaleTracker.zeroVariables()
 
     def locationTracker(self):
         '''

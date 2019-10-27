@@ -248,7 +248,7 @@ class Tracker(QDialog):
         Constantly update data on window label
         '''
         results = f'\n\tdx_px: {self.dx + self.temp_dx}\n'
-        results += f'\tself.temp_dy: {self.dy + self.temp_dy}\n'
+        results += f'\tdy_px: {self.dy + self.temp_dy}\n'
         results += f'\tDistance_px: {self.dist_px}\n'
 
         if self.mode == 'location':
