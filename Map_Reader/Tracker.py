@@ -219,6 +219,16 @@ class Tracker(QDialog):
             coords = geodesic(feet=dist).destination(ref, bearing)
     
         return Point(round(coords.latitude, 6), round(coords.longitude, 6))
+
+    def resetTrace(self):
+        '''
+        Reset reference points if user needs to trace again
+        '''
+        self.refIter = iter(self.ref)
+        self.currentRef = next(self.refIter)
+        self.traceData = []
+        self.zeroVariables()
+        self.updateLabel()
     
     def zeroVariables(self):
         '''
@@ -419,8 +429,8 @@ class Tracker(QDialog):
                 #f'{self.currentRef} is an invalid project'
             )'''     
         except StopIteration:
-            self.averageData(circle=True)
-            self.parent().confirmLocation(self.newLoc.x, self.newLoc.y, self.dist, self.bearing, self.units)           
+            self.averageData()
+            self.parent().confirmLocation(self.newLoc.x, self.newLoc.y)           
         
     def mouseMoveEvent(self, e):
         '''

@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QDoubleValidator, QRegExpValidator
-from PyQt5.QtCore import Qt, QRegExp
+from PyQt5.QtCore import Qt, QRegExp, QDateTime
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import Qt, QUrl, pyqtSlot
 from PyQt5.QtWebChannel import QWebChannel
@@ -180,16 +180,14 @@ class ReferenceWindow(QDialog):
         
 #Class to confirm lat, lon data
 class LocationWindow(QDialog):
-    def __init__(self, lat, lon, dist, bearing, units, parent=None):
+    def __init__(self, lat, lon, parent=None):
         super(LocationWindow, self).__init__(parent)
         self.lat = lat
         self.lon = lon
-        self.dist = dist
-        self.bearing = bearing
-        self.units = units
 
         #self.setFixedSize(300, 100)
         self.setWindowTitle('Confirm Location')
+        self.setAttribute(Qt.WA_QuitOnClose, False)
         self.initUI()
 
     def initUI(self):
@@ -203,53 +201,33 @@ class LocationWindow(QDialog):
         self.latEdit = LineEdit(str(self.lat))
         self.latEdit.setValidator(QDoubleValidator(-90, 90, 5)) 
         self.latEdit.textChanged.connect(self.checkFields)
+        hLayout.addWidget(self.latEdit)
+
         self.lonEdit = LineEdit(str(self.lon))
         self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))   
         self.lonEdit.textChanged.connect(self.checkFields)
-
-        hLayout.addWidget(QLabel('Lat:'))
-        hLayout.addWidget(self.latEdit)
-
-        hLayout.addWidget(QLabel('Lon:'))
         hLayout.addWidget(self.lonEdit)
 
-        #add description box
         self.descBox = QTextEdit()
         self.descBox.setFixedHeight(100)
         self.descBox.setPlaceholderText('Description')
 
-        h2Layout = QHBoxLayout() 
-
-        self.distEdit = LineEdit(str(self.dist))
-        self.distEdit.setValidator(QDoubleValidator(0, 100000000, 5)) 
-        self.distEdit.textChanged.connect(self.checkFields)
-        self.bearingEdit = LineEdit(str(self.bearing))
-        self.bearingEdit.setValidator(QDoubleValidator(0, 360, 5))
-        self.bearingEdit.textChanged.connect(self.checkFields)
-
-        h2Layout.addWidget(QLabel(f'Distance ({self.units}):'))
-        h2Layout.addWidget(self.distEdit)
-
-        h2Layout.addWidget(QLabel('Bearing:'))
-        h2Layout.addWidget(self.bearingEdit)
-
         #horizontal layout containing save and cancel buttons
-        h3Layout = QHBoxLayout()
+        h2Layout = QHBoxLayout()
         self.saveButton = Button('Save')
         self.saveButton.clicked.connect(self.save)
 
         self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
-        h3Layout.addWidget(self.saveButton)
-        h3Layout.addWidget(self.cancelButton)
+        h2Layout.addWidget(self.saveButton)
+        h2Layout.addWidget(self.cancelButton)
 
         mainLayout.addLayout(hLayout)
-        mainLayout.addLayout(h2Layout)
         mainLayout.addWidget(self.descBox)
-        mainLayout.addLayout(h3Layout)
+        mainLayout.addLayout(h2Layout)
 
-        self.mandatoryFields = [self.latEdit, self.lonEdit, self.distEdit, self.bearingEdit]
+        self.mandatoryFields = [self.latEdit, self.lonEdit]
     
         self.setLayout(mainLayout)
         self.setModal(True)
@@ -265,6 +243,14 @@ class LocationWindow(QDialog):
         else:
             self.saveButton.setEnabled(False)
 
+    def getConfirmedData(self):
+        return {
+            'Latitude': self.lat,
+            'Longitude': self.lon,
+            'Date': QDateTime().currentDateTime().toString('MM-dd-yyyy hh:mm:ss ap'),
+            'Description': self.desc
+        }
+
 
     def save(self):
         '''
@@ -272,31 +258,27 @@ class LocationWindow(QDialog):
         screen when save button is clicked.
         '''
         #Get text values from each element
-        lat = eval(self.latEdit.text())
-        lon = eval(self.lonEdit.text())
-        desc = self.descBox.toPlainText()
-        dist = eval(self.distEdit.text())
-        bearing = eval(self.bearingEdit.text())
-        units = self.units
+        self.lat = eval(self.latEdit.text())
+        self.lon = eval(self.lonEdit.text())
+        self.desc = self.descBox.toPlainText()
         
         #check values entered by user are correct
-        upperBound = [90, 180, 10000, 360]
-        lowerBound = [-90, -180, 0.01, 0]
-        fieldVals = [lat, lon, dist, bearing]
+        upperBound = [90, 180]
+        lowerBound = [-90, -180]
+        fieldVals = [self.lat, self.lon]
 
         upperCheck = all(field < limit for field, limit in zip(fieldVals, upperBound))
         lowerCheck = all(field >= limit for field, limit in zip(fieldVals, lowerBound))
 
         if upperCheck and lowerCheck:
-            if self.parent():
-                self.parent().setLocation(lat, lon, desc, dist, bearing, units)
-
+            self.accept()
             self.close()
 
     def cancel(self):
         '''
         Return to mouse tracker screen if cancel button is clicked
         '''
+        self.reject()
         self.close()
 
 class MouseSettingsWindow(QDialog):
@@ -619,7 +601,7 @@ class ReferenceSelectionWindow(QDialog):
 
         mainLayout.addWidget(self.table)
         mainLayout.addLayout(h2Layout)
-
+    
         self.setLayout(mainLayout)
         self.setModal(True)
         self.show()
@@ -631,7 +613,7 @@ class ReferenceSelectionWindow(QDialog):
             self.saveButton.setEnabled(True)
         else:
             self.saveButton.setEnabled(False)
-
+    
     def save(self):
         '''
         Send reference point back to main window to be stored

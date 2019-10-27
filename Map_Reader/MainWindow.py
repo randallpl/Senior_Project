@@ -232,40 +232,29 @@ class MainWindow(QMainWindow):
         if self.reference and self.scale and self.units:
             self.referenceTable = ReferenceSelectionWindow(self.reference)
             if self.referenceTable.exec_():
-                self.locationTracker = Tracker.Tracker(
-                    'location',
+                self.locationTracker = Tracker.Tracker( 
+                    'location', 
                     self,
-                    ref=self.referenceTable.selectedData,
-                    scale=self.scale,
+                    ref=self.referenceTable.selectedData, 
+                    scale=self.scale, 
                     units=self.units
                 )
 
-    def confirmLocation(self, lat, lon, dist, bearing, units):
+    def confirmLocation(self, lat, lon):
         '''
         Launches window to confirm new point data
         '''
-        self.locationConfirm = LocationWindow(lat, lon, dist, bearing, units, self)
+        self.locationConfirm = LocationWindow(lat, lon)
 
-    def setLocation(self, lat, lon, desc, dist, bearing, units):
-        '''
-        Adds location to points list and passes list to Table class to update table data
-        '''
-        self.locationTracker.close()
-        data = {
-            'Latitude': lat,
-            'Longitude': lon,
-            'Date': QDateTime().currentDateTime().toString('MM-dd-yyyy hh:mm:ss ap'),
-            'Description': desc,
-            'Distance': dist,
-            'Bearing': bearing,
-            'Units': units,
-            'ReferencePoint': self.reference,
-            'Scale': self.scale
-        }
-        self.points.append(data)
-        self.table.update(self.points)
-        self.menuExport.setEnabled(True)
-        self.saveFile()
+        if self.locationConfirm.exec_():
+            self.locationTracker.close()
+            data = self.locationConfirm.getConfirmedData()
+            self.points.append(data)
+            self.table.update(self.points)
+            self.menuExport.setEnabled(True)
+            self.saveFile()
+        else:
+            self.locationTracker.resetTrace()
 
     def setAPI(self, api_key, plot):
         '''

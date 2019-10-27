@@ -48,19 +48,19 @@ class Table(QWidget):
 
         self.name = name
         self.index = index
-        self.checkable = checkable
+        self.checkable = checkable            
         
         if not any([data, columns]):
             self.columns = []
         else:
             self.columns = columns if columns else list(data[0].keys())
-
+        
         if checkable:
             self.columns.insert(0, '')
 
         if index:
             self.columns.insert(0, 'ID')
-
+        
         self.setData(data)
 
         self.initUI()
@@ -142,7 +142,7 @@ class Table(QWidget):
                 self.sourceModel.setItem(row_i, col_i, item)
             else:
                 self.sourceModel.setData(self.sourceModel.index(row_i, col_i), data)
-
+            
     def update(self, data):
         self.setData(data)
         self.sourceModel.removeRows(0, self.sourceModel.rowCount())
