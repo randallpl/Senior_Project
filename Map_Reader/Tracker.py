@@ -224,9 +224,10 @@ class Tracker(QDialog):
         '''
         Reset reference points if user needs to trace again
         '''
-        self.refIter = iter(self.ref)
-        self.currentRef = next(self.refIter)
-        self.traceData = []
+        if self.mode == 'location':
+            self.refIter = iter(self.ref)
+            self.currentRef = next(self.refIter)
+            self.traceData = []
         self.zeroVariables()
         self.updateLabel()
     

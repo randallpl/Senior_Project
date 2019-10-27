@@ -217,7 +217,7 @@ class MainWindow(QMainWindow):
             self.saveFile()
             self.scaleTracker.close()
         else:
-            self.scaleTracker.zeroVariables()
+            self.scaleTracker.resetTrace()
 
     def locationTracker(self):
         '''
