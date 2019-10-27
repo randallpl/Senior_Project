@@ -8,7 +8,7 @@ from PyQt5.QtWebChannel import QWebChannel
 import webbrowser
 
 from MouseController import MouseController
-from CustomQtObjects import Button, LineEdit
+from CustomQtObjects import Button, LineEdit, Table
 
 #Class to confirm the scale input data
 class ScaleWindow(QDialog):
@@ -586,10 +586,67 @@ class AboutWindow(QDialog):
         '''
         self.close()
 
+class ReferenceSelectionWindow(QDialog):
+    def __init__(self, points, parent=None):
+        super(ReferenceSelectionWindow, self).__init__(parent)
+        self.resize(450, 300)
+        self.setWindowTitle('Select Reference Points')
+        self.points = points
+        self.tableData = [{'Latitude': lat, 'Longitude': lon} for lat, lon in points]
+        self.setAttribute(Qt.WA_QuitOnClose, False)
+        self.initUI()
+
+    def initUI(self):
+        '''
+        Setup GUI elements of scale window
+        '''
+        mainLayout = QVBoxLayout()
+
+        #horizontal layout containing save and cancel buttons
+        h2Layout = QHBoxLayout()
+        self.saveButton = Button('Trace')
+        self.saveButton.clicked.connect(self.save)
+        self.saveButton.setEnabled(False)
+
+        self.cancelButton = Button('Cancel')
+        self.cancelButton.clicked.connect(self.cancel)
+
+        h2Layout.addWidget(self.saveButton)
+        h2Layout.addWidget(self.cancelButton)
+
+        self.table = Table('Reference Points', self.tableData, checkable=True)
+        self.table.proxyView.clicked.connect(self.checkFields)
+
+        mainLayout.addWidget(self.table)
+        mainLayout.addLayout(h2Layout)
+
+        self.setLayout(mainLayout)
+        self.setModal(True)
+        self.show()
+
+    def checkFields(self):
+        self.selectedData = self.table.getCheckedRowData()
+
+        if self.selectedData:
+            self.saveButton.setEnabled(True)
+        else:
+            self.saveButton.setEnabled(False)
+
+    def save(self):
+        '''
+        Send reference point back to main window to be stored
+        '''
+        self.selectedData = [(item['Latitude'], item['Longitude']) for item in self.selectedData]
+        self.accept()
+        self.close()
+
+    def cancel(self):
+        self.close()
+
 if __name__=='__main__':
     import sys
 
     app = QApplication(sys.argv)
-    window = APIKeyWindow()
+    window = ReferencePointTable([(1,2), (3,4), (5,6)])
     sys.exit(app.exec_())
 

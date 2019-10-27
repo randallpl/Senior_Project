@@ -230,12 +230,15 @@ class MainWindow(QMainWindow):
         Launches window to locate new point from reference point
         '''
         if self.reference and self.scale and self.units:
-            self.locationTracker = Tracker.Tracker( 
-                'location', 
-                self,
-                ref=self.reference, 
-                scale=self.scale, 
-                units=self.units)
+            self.referenceTable = ReferenceSelectionWindow(self.reference)
+            if self.referenceTable.exec_():
+                self.locationTracker = Tracker.Tracker(
+                    'location',
+                    self,
+                    ref=self.referenceTable.selectedData,
+                    scale=self.scale,
+                    units=self.units
+                )
 
     def confirmLocation(self, lat, lon, dist, bearing, units):
         '''

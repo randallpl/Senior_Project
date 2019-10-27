@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import (QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt,
-        QTime, QModelIndex, QSize)
-from PyQt5.QtGui import QStandardItemModel, QIcon
+        QTime, QModelIndex, QSize, pyqtSignal, QObject)
+from PyQt5.QtGui import QStandardItemModel, QIcon, QStandardItem
 
 class Button(QPushButton):
     def __init__(self, name=None):
@@ -35,17 +35,28 @@ class LineEdit(QLineEdit):
         QLineEdit.focusOutEvent(self, event)
         self.setGraphicsEffect(None)
 
+class CheckBoxProxyStyle(QProxyStyle):
+    def subElementRect(self, element, option, widget):
+        rect = super().subElementRect(element, option, widget)
+        if element == QStyle.SE_ItemViewItemCheckIndicator:
+            rect.moveCenter(option.rect.center())
+        return rect
+
 class Table(QWidget):
-    def __init__(self, name, data, columns=None, index=False, sortCol=None, parent=None):
-        super(Table, self).__init__(parent)
+    def __init__(self, name, data, columns=None, index=False, checkable=False, parent=None):
+        QWidget.__init__(self, parent)
 
         self.name = name
         self.index = index
+        self.checkable = checkable
         
         if not any([data, columns]):
             self.columns = []
         else:
-            self.columns = columns if columns else data[0].keys()
+            self.columns = columns if columns else list(data[0].keys())
+
+        if checkable:
+            self.columns.insert(0, '')
 
         if index:
             self.columns.insert(0, 'ID')
@@ -53,7 +64,6 @@ class Table(QWidget):
         self.setData(data)
 
         self.initUI()
-        self.sortBy(sortCol)
 
     def initUI(self):
         '''
@@ -73,10 +83,11 @@ class Table(QWidget):
         self.proxyGroupBox = QGroupBox(self.name)
 
         self.proxyView = QTreeView()
+        self.proxyView.setStyle(CheckBoxProxyStyle(self.proxyView.style()))
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.proxyModel)
-        self.proxyView.setSortingEnabled(True)
+        self.proxyView.setSortingEnabled(not self.checkable)
 
         self.proxyView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
@@ -92,7 +103,17 @@ class Table(QWidget):
         self.proxyModel.setSourceModel(model)
 
     def setData(self, data):
-        self.data = [{k: item.get(k, i+1) for k in self.columns} for i, item in enumerate(data)]
+        self.data = []
+        for i, item in enumerate(data):
+            d = {}
+            for col in self.columns:
+                if col == 'ID':
+                    d[col] = item.get(col, i+1)
+                else:
+                    d[col] = item.get(col)
+            self.data.append(d)
+
+        #self.data = [{k: item.get(k, i+1) for k in self.columns} for i, item in enumerate(data)]
 
     def sortBy(self, colName):
         idx = 0
@@ -109,23 +130,19 @@ class Table(QWidget):
     def columnCount(self):
         return self.sourceModel.columnCount()
 
-    def setColumns(self, cols):
-        if not cols:
-            self.columns = self.data[0].keys()
-
-        if self.index:
-            self.columns = ['ID'] + cols
-        else:
-            self.columns = columns
-            
-        self.update(self.data)
-
     def addRow(self, row_i, rowData):
         self.sourceModel.insertRow(row_i)
 
         for col_i, data in enumerate(rowData.values()):
-           self.sourceModel.setData(self.sourceModel.index(row_i, col_i), data)
-        
+            if self.checkable and col_i == 0:
+                self.proxyView.setColumnWidth(col_i, 1)
+                item = QStandardItem(True)
+                item.setCheckable(True)
+                item.setCheckState(False)
+                self.sourceModel.setItem(row_i, col_i, item)
+            else:
+                self.sourceModel.setData(self.sourceModel.index(row_i, col_i), data)
+
     def update(self, data):
         self.setData(data)
         self.sourceModel.removeRows(0, self.sourceModel.rowCount())
@@ -138,3 +155,12 @@ class Table(QWidget):
             return self.proxyView.selectedIndexes()[0].row()
         except:
             return False
+
+    def getCheckedRowData(self):
+        selectedData = []
+        for row_i in range(self.sourceModel.rowCount()):
+            item = self.sourceModel.item(row_i, 0)
+            if item.checkState():
+                selectedData.append(self.data[row_i])
+
+        return selectedData
