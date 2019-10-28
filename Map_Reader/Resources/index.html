@@ -35,12 +35,18 @@
     <div id="map"></div>
     <script>
         var map;
-        function contentString(pid, desc, date){
+        function contentString(pid, desc, date, lat, lon){
             if (desc != ''){
                 desc += '</br></br>'
             }
-            var contentString ='<h3>Point ' + pid + '</h3>'+
+            var contentString = '<h4>Point '+pid+'</h4>'+
+                '<h4>('+lat+', '+lon+')</h4>'+
                 '<p>' + desc + '\n' + 'last visited: ' + date + '</p>'
+            return contentString
+        }
+        function refString(lat, lon){
+            var contentString = '<h4>Reference Point</h4>'+
+                '<h4>('+lat+', '+lon+')</h4>'
             return contentString
         }
         function initMap() {
@@ -62,7 +68,7 @@
 
                             for(let i=0; i<ref.length; i++){
                                 refInfo[i] = new google.maps.InfoWindow({
-                                    content: 'Referenece Point'
+                                    content: refString(ref[i]['lat'], ref[i]['lng'])
                                 });
 
                                 refMarkers[i] = new google.maps.Marker({
@@ -83,7 +89,7 @@
                                 var date = points[i]['Date']
 
                                 markersInfo[i] = new google.maps.InfoWindow({
-                                    content: contentString(i+1, desc, date)
+                                    content: contentString(i+1, desc, date, loc['lat'], loc['lng'])
                                 });
 
                                 markers[i] = new google.maps.Marker({
