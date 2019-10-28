@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, QRegExp, QDateTime
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import Qt, QUrl, pyqtSlot
 from PyQt5.QtWebChannel import QWebChannel
+from statistics import mean
 import webbrowser
 
 from MouseController import MouseController
@@ -510,11 +511,18 @@ class MapWindow(QDialog):
 
         layout.addWidget(self.mapView)
         self.setLayout(layout)
+    
+    @pyqtSlot(result=list)
+    def getCenter(self):
+        avgLat = mean([lat for lat,_ in self.ref])
+        avgLon = mean([lon for _,lon in self.ref])
+
+        return [{'lat': avgLat, 'lng': avgLon}]
 
     #pass reference point to index.html
     @pyqtSlot(result=list)
     def getRef(self):
-        return [{'lat': self.ref[0], 'lng': self.ref[1]}]
+        return [{'lat': lat, 'lng': lng} for lat, lng in self.ref]
 
     #pass point data to index.html
     @pyqtSlot(result=list)

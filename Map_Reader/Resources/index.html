@@ -48,30 +48,35 @@
             new QWebChannel(qt.webChannelTransport, function(channel) {
                 backend = channel.objects.backend;
                     backend.getRef(function(ref) {
+                        backend.getCenter(function(center) {
                         backend.getPoints(function(points){
                             map = new google.maps.Map(document.getElementById('map'), {
-                                center: ref[0],
+                                center: center[0],
                                 zoom: 10
                             });
 
                             var markers = [points.length];
                             var markersInfo = [points.length]
+                            var refMarkers = [ref.length]
+                            var refInfo = [ref.length]
 
-                            var refMarker = new google.maps.Marker({
-                                icon : 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
-                                position: ref[0],
-                                map: map,
-                                title: 'Reference Point'
-                            });
-
-                            var refInfo = new google.maps.InfoWindow({
+                            for(let i=0; i<ref.length; i++){
+                                refInfo[i] = new google.maps.InfoWindow({
                                     content: 'Referenece Point'
-                            });
+                                });
 
-                            refMarker.addListener('click', function() {
-                                    refInfo.open(map, refMarker);
-                            });
+                                refMarkers[i] = new google.maps.Marker({
+                                    icon : 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                                    position: ref[i],
+                                    map: map,
+                                    title: 'Reference Point'
+                                });
 
+                                refMarkers[i].addListener('click', function() {
+                                    refInfo[i].open(map, refMarkers[i]);
+                                });
+                            }
+                            
                             for(let i=0; i<points.length; i++){
                                 var desc = points[i]['Description']
                                 var loc = points[i]['Point']
@@ -95,6 +100,7 @@
                         });
                     });                   
                 });
+            });
         }
     </script>
     <script>
