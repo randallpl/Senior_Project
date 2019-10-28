@@ -67,7 +67,7 @@ class StarterWindow(QDialog):
             
         self.projectTable.cellDoubleClicked.connect(self.openProjectDC)
         self.projectTable.setHorizontalHeaderLabels(["PROJECTS", "NoPOINTS"])
-        #self.projectTable.itemDoubleClicked(self.projectTable.horizontalHeader).connect(self.orderTable)
+        
         header = self.projectTable.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeToContents)       
         header.setSectionResizeMode(0, QHeaderView.Stretch)
@@ -248,13 +248,7 @@ class StarterWindow(QDialog):
         '''
         self.aboutScreen = AboutWindow()
 
-    def mouseDoubleClickEvent(self, ev: QtGui.QMouseEvent):
-        # super(VQMemoryCanvas, self).mouseDoubleClickEvent(ev)
-     
-        print("double click")
-    def orderTable(self):
-        print("header clicked")
-        
+    
 
 if __name__ == '__main__':
 
