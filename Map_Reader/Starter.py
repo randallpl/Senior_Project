@@ -64,10 +64,14 @@ class StarterWindow(QDialog):
             self.projectTable.setItem(i,0, QTableWidgetItem(entry))
             self.projectTable.setItem(i,1, QTableWidgetItem(str(len(self.points))))
             
+            
         self.projectTable.cellDoubleClicked.connect(self.openProjectDC)
         self.projectTable.setHorizontalHeaderLabels(["PROJECTS", "NoPOINTS"])
         #self.projectTable.itemDoubleClicked(self.projectTable.horizontalHeader).connect(self.orderTable)
-        self.projectTable.resizeRowsToContents()
+        header = self.projectTable.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)       
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
 
         self.newButton = Button('New')
         self.newButton.clicked.connect(self.newProject)
@@ -137,10 +141,12 @@ class StarterWindow(QDialog):
         item = self.projectTable.currentItem()
         
         projectName = item.text()
+        if column == 0:
+            self.hide()
+            self.mw = MainWindow(projectName, self, openExisting=True)
         
-        self.hide()
 
-        self.mw = MainWindow(projectName, self, openExisting=True)
+        
 
     def createProject(self, projectName, refPoint):
         '''
