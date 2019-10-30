@@ -34,13 +34,6 @@ class LineEdit(QLineEdit):
         QLineEdit.focusOutEvent(self, event)
         self.setGraphicsEffect(None)
 
-class CheckBoxProxyStyle(QProxyStyle):
-    def subElementRect(self, element, option, widget):
-        rect = super().subElementRect(element, option, widget)
-        if element == QStyle.SE_ItemViewItemCheckIndicator:
-            rect.moveCenter(option.rect.center())
-        return rect
-
 class Table(QWidget):
     def __init__(self, name, data, columns=None, index=False, checkable=False, parent=None):
         QWidget.__init__(self, parent)
@@ -82,7 +75,6 @@ class Table(QWidget):
         self.proxyGroupBox = QGroupBox(self.name)
 
         self.proxyView = QTreeView()
-        self.proxyView.setStyle(CheckBoxProxyStyle(self.proxyView.style()))
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.proxyModel)

@@ -51,7 +51,6 @@ QTreeView::item::hover{
   background-color: rgba(179, 179, 179, 0.555);
 }
 
-
 QLabel{
     color: rgb(0, 0, 0);
     font-size: 15px;

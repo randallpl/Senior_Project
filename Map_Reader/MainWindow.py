@@ -13,9 +13,10 @@ from Windows import *
 from CustomQtObjects import Table
 
 class MainWindow(QMainWindow):
-    def __init__(self, projectName, parent, reference=None, createdDate=None, openExisting=False):
-        super(MainWindow, self).__init__(parent)
+    def __init__(self, projectName, controller, reference=None, createdDate=None, openExisting=False):
+        super(MainWindow, self).__init__()
         self.setFixedSize(1080, 768)
+        self.controller = controller
         self.projectName = projectName
         self.scale = None
         self.reference = reference
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow):
         self.menuNew = QAction("&New", self)
         self.menuNew.setShortcut("Ctrl+N")
         self.menuNew.setStatusTip('New Project')
-        self.menuNew.triggered.connect(self.parent().newProject)
+        self.menuNew.triggered.connect(partial(self.controller.newProject, self))
 
         self.menuSave = QAction("&Save", self)
         self.menuSave.setShortcut("Ctrl+S")
@@ -46,12 +47,12 @@ class MainWindow(QMainWindow):
         self.menuOpen = QAction("&Open", self)
         self.menuOpen.setShortcut("Ctrl+O")
         self.menuOpen.setStatusTip('Open File')
-        self.menuOpen.triggered.connect(self.parent().openProject)
+        self.menuOpen.triggered.connect(partial(self.controller.browseProjectsDir, self))
 
         self.menuClose = QAction("&Close", self)
         self.menuClose.setShortcut("Ctrl+E")
         self.menuClose.setStatusTip('Close File')
-        self.menuClose.triggered.connect(partial(self.parent().starterScreen, closeMW=True))
+        self.menuClose.triggered.connect(self.controller.closeProject)
 
         self.menuExit = QAction("&Exit", self)
         self.menuExit.setShortcut("Ctrl+Q")
@@ -63,19 +64,19 @@ class MainWindow(QMainWindow):
         
         self.exportCSV = QAction('CSV', self)
         self.menuExport.addAction(self.exportCSV)
-        self.exportCSV.triggered.connect(self.exportToCSV)
+        self.exportCSV.triggered.connect(partial(self.export, 'csv'))
 
         self.exportJSON = QAction('JSON', self)
         self.menuExport.addAction(self.exportJSON)
-        self.exportJSON.triggered.connect(self.exportToJSON)
+        self.exportJSON.triggered.connect(partial(self.export, 'json'))
 
         self.exportExcel = QAction('Excel', self)
         self.menuExport.addAction(self.exportExcel)
-        self.exportExcel.triggered.connect(self.exportToExcel)
+        self.exportExcel.triggered.connect(partial(self.export, 'xlsx'))
 
         self.exportHTML = QAction('HTML', self)
         self.menuExport.addAction(self.exportHTML)
-        self.exportHTML.triggered.connect(self.exportToHTML)
+        self.exportHTML.triggered.connect(partial(self.export, 'html'))
 
         self.fileMenu.addAction(self.menuNew)
         self.fileMenu.addAction(self.menuOpen)
@@ -106,23 +107,23 @@ class MainWindow(QMainWindow):
 
         self.themeBlack = QAction('Black', self)
         self.menuTheme.addAction(self.themeBlack)
-        self.themeBlack.triggered.connect(partial(self.parent().loadTheme, 'Black'))
+        self.themeBlack.triggered.connect(partial(self.controller.loadTheme, 'Black'))
 
         self.themeBlue = QAction('Blue', self)
         self.menuTheme.addAction(self.themeBlue)
-        self.themeBlue.triggered.connect(partial(self.parent().loadTheme, 'Blue'))
+        self.themeBlue.triggered.connect(partial(self.controller.loadTheme, 'Blue'))
 
         self.themeGreen = QAction('Green', self)
         self.menuTheme.addAction(self.themeGreen)
-        self.themeGreen.triggered.connect(partial(self.parent().loadTheme, 'Green'))
+        self.themeGreen.triggered.connect(partial(self.controller.loadTheme, 'Green'))
 
         self.themeTest = QAction('Test', self)
         self.menuTheme.addAction(self.themeTest)
-        self.themeTest.triggered.connect(partial(self.parent().loadTheme, 'Test'))
+        self.themeTest.triggered.connect(partial(self.controller.loadTheme, 'Test'))
 
         self.themeDefault = QAction('Default', self)
         self.menuTheme.addAction(self.themeDefault)
-        self.themeDefault.triggered.connect(partial(self.parent().loadTheme))
+        self.themeDefault.triggered.connect(partial(self.controller.loadTheme))
 
         self.settingsMenu.addAction(self.menuMouseSettings)
         self.settingsMenu.addAction(self.menuProjectSettings)
@@ -177,19 +178,17 @@ class MainWindow(QMainWindow):
         self.show()
     
     def setProjectName(self, name):
-        try:
-            os.rename(f'./Projects/{self.projectName}', f'./Projects/{name}')
-        except:
+        
+        if self.controller.setProjectName(self.projectName, name):
+            self.projectName = name
+            self.setWindowTitle(f'Map Reader - {self.projectName}')
+            self.saveFile()
+        else:
             QMessageBox.critical(
                 self,
                 'Project Error',
                 f'Invalid project name: {name}'
             )
-            return
-
-        self.projectName = name
-        self.setWindowTitle(f'Map Reader - {self.projectName}')
-        self.saveFile()
 
     def referenceWindow(self):
         '''
@@ -301,7 +300,7 @@ class MainWindow(QMainWindow):
 
     def saveFile(self):
         '''
-        Saves the project data in json format and writes to a file
+        Stores all project data and passes to project controller to be saved
         '''
         savestate = {
             'ProjectName': self.projectName,
@@ -313,23 +312,23 @@ class MainWindow(QMainWindow):
             'Points': self.points,
             'APIKey': self.api,
         }
+        if self.controller.saveProject(self.projectName, savestate):
+            pass
+        else:
+            QMessageBox.critical(
+                self,
+                'Save Error',
+                f'Project failed to be saved'
+            )
 
-        with open(f'./Projects/{self.projectName}/project_data.json', 'w+') as f:
-            f.write(json.dumps(savestate, indent=2))
 
     def openExistingProject(self, projectName):
         '''
         Populates table with existing project data from given project
         '''
-        try:
-            with open(f'./Projects/{projectName}/project_data.json', 'r') as f:
-                data = json.loads(f.read())
-        except:
-            QMessageBox.critical(
-                self,
-                'File Not Found',
-                f'{projectName} is not supported')
-        else:
+        data = self.controller.getProjectData(projectName)
+
+        if data:
             self.projectName = data.get('ProjectName')
             self.createdDate = data.get('Created')
             self.reference = data.get('Reference')
@@ -337,6 +336,11 @@ class MainWindow(QMainWindow):
             self.units = data.get('Units')
             self.points = data.get('Points')
             self.api = data.get('APIKey')
+        else:
+            QMessageBox.critical(
+                self,
+                'File Not Found',
+                f'{projectName} is not supported')
 
     def closeApplication(self):
         '''
@@ -352,75 +356,22 @@ class MainWindow(QMainWindow):
         if choice == QMessageBox.Yes:
             sys.exit()
 
-    def exportToCSV(self):
+    def export(self, file_type):
         '''
         Export table data to csv file
         '''
-        df = pd.DataFrame(self.points)
-        
-        try:
-            df.to_csv(f'./Projects/{self.projectName}/Reports/{QDate.currentDate().toString("MM-dd-yy")}_Report.csv', index=False)   
-        except:
-            self.fileCreatedAlert('CSV', True)	
-        else:
-            self.fileCreatedAlert('CSV')
-
-    def exportToJSON(self):
-        '''
-        Export table data to json file
-        '''
-        json_data = json.dumps(self.points, indent=2)
-        
-        try:
-            with open(f'./Projects/{self.projectName}/Reports/{QDate.currentDate().toString("MM-dd-yy")}_Report.json', 'w+') as f:
-                f.write(json_data)
-        except:
-            self.fileCreatedAlert('JSON', True)	
-        else:
-            self.fileCreatedAlert('JSON')
-
-    def exportToExcel(self):
-        '''
-        Export table data to excel file
-        '''
-        df = pd.DataFrame(self.points)
-        
-        try:
-            df.to_excel(f'./Projects/{self.projectName}/Reports/{QDate.currentDate().toString("MM-dd-yy")}_Report.xlsx', index=False)
-        except:
-            self.fileCreatedAlert('Excel', True)
-        else:
-            self.fileCreatedAlert('Excel')
-
-    def exportToHTML(self):
-        '''
-        Export table data to html file
-        '''
-        df = pd.DataFrame(self.points)
-        
-        try:
-            df.to_html(f'./Projects/{self.projectName}/Reports/{QDate.currentDate().toString("MM-dd-yy")}_Report.html', index=False)	
-        except:
-            self.fileCreatedAlert('HTML', True)
-        else:
-            self.fileCreatedAlert('HTML')
-		
-    def fileCreatedAlert(self, filetype, error=False):
-        '''
-        Display alert box to inform user export file was created
-        '''
-        if error:
-            QMessageBox.critical(
-                self,
-                'Export File',
-                f'{filetype} file failed to be created'
-            )	
-        else:
+        if self.controller.exportProjectData(self.projectName, self.points, file_type):
             QMessageBox.information(
                 self,
                 'Export File',
-                f'{filetype} file was successfully created'
+                f'{file_type} file was successfully created'
             )
+        else:
+            QMessageBox.critical(
+                self,
+                'Export File',
+                f'{file_type} file failed to be created'
+            )	
 
     def deleteRowFromTable(self):
         '''

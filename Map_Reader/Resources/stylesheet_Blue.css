@@ -53,10 +53,6 @@ QTreeView::item:selected:active{
   background-color: rgba(0, 114, 190, 0.555);
 }
 
-QTreeView::item::hover{
-  background-color: rgba(151, 213, 255, 0.555);
-}
-
 QDialog{
   background-image: url('./Resources/app_bg_blue.jpg');
 }

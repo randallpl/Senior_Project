@@ -47,11 +47,6 @@ QTreeView::item:selected:active{
   background-color: rgba(53, 53, 53, 0.555);
 }
 
-QTreeView::item::hover{
-  background-color: rgba(179, 179, 179, 0.555);
-}
-
-
 QLabel{
     color: rgb(0, 0, 0);
     font-size: 15px;

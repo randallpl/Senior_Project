@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QUrl, pyqtSlot
 from PyQt5.QtWebChannel import QWebChannel
 from statistics import mean
 import webbrowser
+from functools import partial
 
 from MouseController import MouseController
 from CustomQtObjects import Button, LineEdit, Table
@@ -625,6 +626,75 @@ class ReferenceSelectionWindow(QDialog):
 
     def cancel(self):
         self.close()
+
+class StarterWindow(QDialog):
+    def __init__(self, controller):
+        super(StarterWindow, self).__init__()
+        self.controller = controller
+        self.setFixedSize(500, 600)
+        self.setWindowTitle('Welcome to MapReader')
+        self.aboutWindow = None
+        self.initUI()
+
+    def initUI(self):
+        '''
+        Setup GUI elements of scale window
+        '''
+        mainLayout = QVBoxLayout()
+
+        #horizontal layout containing new and open buttons
+        hLayout = QHBoxLayout()
+        self.projectTable = QTableWidget(self)
+
+        projects_data = self.controller.getAllProjectData()
+        self.projectTable.setRowCount(len(projects_data))
+        self.projectTable.setColumnCount(2)
+        
+        for i, project in enumerate(projects_data):
+            self.projectTable.setItem(i,0, QTableWidgetItem(project.get('ProjectName')))
+            self.projectTable.setItem(i,1, QTableWidgetItem(str(len(project.get('Points')))))
+            
+        self.projectTable.cellDoubleClicked.connect(self.openProjectDC)
+        
+        self.projectTable.setHorizontalHeaderLabels(["Projects", "No. Points"])
+        header = self.projectTable.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)       
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+
+        self.newButton = Button('New')
+        self.newButton.clicked.connect(partial(self.controller.newProject, self))
+
+        self.openButton = Button('Open')
+        self.openButton.clicked.connect(partial(self.controller.browseProjectsDir, self))
+
+        self.aboutButton = Button('About')
+        self.aboutButton.clicked.connect(self.aboutProject)
+        
+        mainLayout.addWidget(self.projectTable)
+        hLayout.addWidget(self.newButton)
+        hLayout.addWidget(self.openButton)
+        hLayout.addWidget(self.aboutButton)
+
+        mainLayout.addLayout(hLayout)
+    
+        self.setLayout(mainLayout)
+
+        self.show()     
+
+    def openProjectDC(self, row, column):
+        item = self.projectTable.currentItem()
+        
+        projectName = item.text()
+        if column == 0:
+            self.hide()
+            self.controller.openProject(projectName, self)
+        
+    def aboutProject(self):
+        '''
+        Show About Screen
+        '''
+        self.aboutScreen = AboutWindow()
 
 if __name__=='__main__':
     import sys
