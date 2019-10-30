@@ -4,7 +4,7 @@ import pytest
 
 @pytest.fixture
 def window():
-    window = LocationWindow(38.12345, -121.12345, 100, 95, 'km')
+    window = LocationWindow(38.12345, -121.12345)
     return window
 
 def test_1(qtbot, window):
@@ -15,8 +15,6 @@ def test_1(qtbot, window):
 
     assert window.latEdit.text() == '38.12345'
     assert window.lonEdit.text() == '-121.12345'
-    assert window.distEdit.text() == '100'
-    assert window.bearingEdit.text() == '95'
     assert window.descBox.toPlainText() == ''
     assert window.saveButton.isEnabled() == True
 
@@ -80,91 +78,28 @@ def test_6(qtbot, window):
 
 def test_7(qtbot, window):
     '''
-    Test if save is disabled when distance data is not entered
-    '''
-    window.distEdit.setText(None)
-
-    assert window.saveButton.isEnabled() == False
-
-def test_8(qtbot, window):
-    '''
-    Test if save is disabled when bearing data is not entered
-    '''
-    window.bearingEdit.setText(None)
-
-    assert window.saveButton.isEnabled() == False
-
-def test_9(qtbot, window):
-    '''
     Test if save is enabled if description data is not entered
     '''
     window.descBox.setText(None)
 
     assert window.saveButton.isEnabled() == True
 
-def test_10(qtbot, window):
-    '''
-    Test if bearing value below 0 can't be entered
-    '''
-    window.bearingEdit.setText(None)
-
-    qtbot.keyClicks(window.bearingEdit, '-12.234')
-
-    assert window.bearingEdit.text() == '12.234'
-
-def test_11(qtbot, window):
-    '''
-    Test if bearing value over 360 can't be saved
-    '''
-    window.bearingEdit.setText(None)
-
-    qtbot.keyClicks(window.bearingEdit, '361.123')
-    qtbot.mouseClick(window.saveButton, QtCore.Qt.LeftButton)
-
-    assert window.isActiveWindow() == True
-
-def test_12(qtbot, window):
-    '''
-    Test if distance value below 0 can't be entered
-    '''
-    window.distEdit.setText(None)
-
-    qtbot.keyClicks(window.distEdit, '-1')
-
-    assert window.distEdit.text() == '1'
-
-def test_13(qtbot, window):
-    '''
-    Test that 0 distance values can't be saved
-    '''
-    window.distEdit.setText(None)
-
-    qtbot.keyClicks(window.distEdit, '0')
-    qtbot.mouseClick(window.saveButton, QtCore.Qt.LeftButton)
-
-    assert window.isActiveWindow() == True
-
-
-def test_14(qtbot, window):
+def test_8(qtbot, window):
     '''
     Test data is saved and window is closed when all fields are entered correctly
     '''
     window.latEdit.setText(None)
     window.lonEdit.setText(None)
-    window.distEdit.setText(None)
-    window.bearingEdit.setText(None)
     window.descBox.setText(None)
 
     qtbot.keyClicks(window.latEdit, '31.12345')
     qtbot.keyClicks(window.lonEdit,'-121.12345')
-    qtbot.keyClicks(window.distEdit, '1000')
-    qtbot.keyClicks(window.bearingEdit, '30.3')
     qtbot.keyClicks(window.descBox, 'Test description')
     qtbot.mouseClick(window.saveButton, QtCore.Qt.LeftButton)
 
     assert window.isActiveWindow() == False
 
-def test_15(qtbot, window):
+def test_9(qtbot, window):
     '''
     Test that window is closed when cancel is pressed
     '''
