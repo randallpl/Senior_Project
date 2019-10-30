@@ -39,14 +39,43 @@ class StarterWindow(QDialog):
         Setup GUI elements of scale window
         '''
         mainLayout = QVBoxLayout()
-
+        data = self.getProjects()
         #horizontal layout containing new and open buttons
         hLayout = QHBoxLayout()
-        self.projectTable = Table('Projects', self.getProjects(), columns=['Projects'])
+        self.projectTable = QTableWidget(self)
         
+        
+        self.projectTable.setRowCount(len(data))
+        self.projectTable.setColumnCount(2)
+        
+        for i in range(len(data)):
+            entry = str(data[i])
+            try:
+                with open(f'./Projects/{entry}/project_data.json', 'r') as f:
+                    projectData = json.loads(f.read())
+            except:
+                QMessageBox.critical(
+                    self,
+                '   File Not Found',
+                    f'{entry} is not supported')
+            else:
+            
+                self.points = projectData.get('Points')
+            self.projectTable.setItem(i,0, QTableWidgetItem(entry))
+            self.projectTable.setItem(i,1, QTableWidgetItem(str(len(self.points))))
+            
+            
+        self.projectTable.cellDoubleClicked.connect(self.openProjectDC)
+        self.projectTable.setHorizontalHeaderLabels(["PROJECTS", "NoPOINTS"])
+        
+        header = self.projectTable.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.ResizeToContents)       
+        header.setSectionResizeMode(0, QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.Stretch)
+
         self.newButton = Button('New')
         self.newButton.clicked.connect(self.newProject)
-
+        
         self.openButton = Button('Open')
         self.openButton.clicked.connect(self.openProject)
 
@@ -108,6 +137,15 @@ class StarterWindow(QDialog):
         Send reference point back to main window to be stored
         '''
         self.newProjectWizard = NewProjectWizard(self)
+    def openProjectDC(self, row, column):
+        item = self.projectTable.currentItem()
+        
+        projectName = item.text()
+        if column == 0:
+            self.hide()
+            self.mw = MainWindow(projectName, self, openExisting=True)
+        
+
         
 
     def createProject(self, projectName, refPoint):
@@ -185,9 +223,10 @@ class StarterWindow(QDialog):
                     self,
                     'Invalid Project',
                     f'{filename} is an invalid project')
+
     
     def getProjects(self):
-        return [{'Projects': f.name} for f in os.scandir('./Projects') if f.is_dir()]
+        return [f.name for f in os.scandir('./Projects') if f.is_dir()]
 
     def starterScreen(self, closeMW=False):
         '''
@@ -208,6 +247,8 @@ class StarterWindow(QDialog):
         Show About Screen
         '''
         self.aboutScreen = AboutWindow()
+
+    
 
 if __name__ == '__main__':
 

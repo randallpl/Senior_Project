@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import (QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt,
-        QTime, QModelIndex, QSize, pyqtSignal, QObject)
+from PyQt5.QtCore import QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt, QTime, QModelIndex, QSize, pyqtSignal, QObject
 from PyQt5.QtGui import QStandardItemModel, QIcon, QStandardItem
 
 class Button(QPushButton):
@@ -66,15 +65,15 @@ class Table(QWidget):
         self.initUI()
 
     def initUI(self):
-        '''
-        Layout UI elements of table
-        '''
+     #  Layout UI elements of table
+        
         mainLayout = QVBoxLayout()
 
         self.proxyModel = QSortFilterProxyModel()
         self.proxyModel.setDynamicSortFilter(True)
 
         self.sourceModel = QStandardItemModel(0, len(self.columns), self)
+        
         for i, column in enumerate(self.columns):
             self.sourceModel.setHeaderData(i, Qt.Horizontal, column)
 
@@ -98,7 +97,8 @@ class Table(QWidget):
         mainLayout.addWidget(self.proxyGroupBox)
         self.setLayout(mainLayout)
         self.update(self.data)
-
+        
+    
     def setSourceModel(self, model):
         self.proxyModel.setSourceModel(model)
 
