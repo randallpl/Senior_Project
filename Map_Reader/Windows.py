@@ -547,7 +547,7 @@ About Window Class Containing Info About Project
 class AboutWindow(QDialog):
     def __init__(self):
         super(AboutWindow, self).__init__()
-        self.setFixedSize(300,250)
+        self.setFixedSize(300,350)
         self.setWindowTitle('About This Project')
         self.initUI()
     
@@ -556,7 +556,7 @@ class AboutWindow(QDialog):
         self.textbox = QLabel()
         self.textbox.setAlignment(Qt.AlignLeft)
         self.textbox.setWordWrap(True)
-        self.textbox.setText('Authors: \n\tEvan Brittain\n\tGabriel Aguirre\n\tJoseph Donati\n\tRyan Swearingen\n\tRandall Plant\n\tBlake Carlisle\n\nVersion:  1.0')
+        self.textbox.setText('ABOUT THIS PROJECT:\n\n“MapReader” is a software application designed to read latitude and longitude coordinates from a physical map using a mouse as an input device. These coordinates can then be reviewed for analytical purposes and exported to a data file. The purpose of this software is enabling the user to find coordinates on a physical map when points are not easily located using latitude and longitude lines. The application is designed for field researchers, taking into consideration the unique limitations of being used outdoors on laptops and out of network range.\n\nAuthors: \n\tEvan Brittain\n\tGabriel Aguirre\n\tJoseph Donati\n\tRyan Swearingen\n\tRandall Plant\n\tBlake Carlisle\n\nVersion:  1.0')
         self.aboutlayout.addWidget(self.textbox)
         self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
