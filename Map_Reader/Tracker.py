@@ -66,6 +66,11 @@ class Tracker(QDialog):
         self.setWindowTitle(self.mode)
         self.setModal(True)
         self.showFullScreen()
+        QMessageBox.information(self,
+                'Tracing Prompt',
+                'Begin tracing from first reference point:\n\n'+'Latitude - '+str(self.currentRef[0])+'\nLongitude - '+str(self.currentRef[1]),
+                QMessageBox.Ok
+            )
         
     def getCenter(self):
         '''
@@ -423,12 +428,12 @@ class Tracker(QDialog):
             self.traceData.append(data)
             self.zeroVariables()
         try:
-            self.currentRef = next(self.refIter)  
-            '''QMessageBox.critical(
-                #self,
-                #'Invalid Project',
-                #f'{self.currentRef} is an invalid project'
-            )'''     
+            self.currentRef = next(self.refIter)
+            QMessageBox.information(self,
+                'Tracing Prompt',
+                'Begin tracing from next reference point:\n\n'+'Latitude - '+str(self.currentRef[0])+'\nLongitude - '+str(self.currentRef[1]),
+                QMessageBox.Ok
+            )
         except StopIteration:
             self.averageData()
             self.parent().confirmLocation(self.newLoc.x, self.newLoc.y)           
@@ -446,5 +451,5 @@ if __name__ == '__main__':
     import sys
 
     app = QApplication(sys.argv)
-    window = Tracker('location', ref=[(0,0), (1,2), (2,0)], scale=100, units='km')
+    window = Tracker('location', ref=[(1,2), (3,4), (5,6)], scale=100, units='km')
     sys.exit(app.exec_())
