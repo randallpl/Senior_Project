@@ -1,6 +1,7 @@
 from PyQt5.QtCore import Qt, QDateTime, QRegExp
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
+from PyQt5.QtGui import QPixmap
 
 #Class to display new project wizard
 class NewProjectWizard(QWizard):
@@ -98,12 +99,22 @@ class WizardDataPage(QWizardPage):
         self.lonLineEdit.setValidator(QtGui.QDoubleValidator(-180.00000, 180.00000, 5))
         self.registerField('longitude*', self.lonLineEdit)
 
-        self.layout = QGridLayout()
-        self.layout.addWidget(self.nameLabel, 0, 0)
-        self.layout.addWidget(self.nameLineEdit, 0, 1, 1, 3)
-        self.layout.addWidget(self.refLabel, 1, 0)
-        self.layout.addWidget(self.latLineEdit, 1, 1)
-        self.layout.addWidget(self.lonLineEdit, 1, 2)
+        self.mapGraphic = QLabel(self)
+        self.pixmap = QPixmap('Resources/LatLongImg_v0.2.png')
+        self.mapGraphic.setPixmap(self.pixmap)
+        self.resize(self.pixmap.width(), self.pixmap.height())
+        
+        self.layout = QVBoxLayout()
+        self.layout2 = QGridLayout()
+
+        self.layout2.addWidget(self.nameLabel, 0, 0)
+        self.layout2.addWidget(self.nameLineEdit, 0, 1, 1, 3)
+        self.layout2.addWidget(self.refLabel, 1, 0)
+        self.layout2.addWidget(self.latLineEdit, 1, 1)
+        self.layout2.addWidget(self.lonLineEdit, 1, 2)
+
+        self.layout.addLayout(self.layout2)
+        self.layout.addWidget(self.mapGraphic)
 
         self.setLayout(self.layout)
 
