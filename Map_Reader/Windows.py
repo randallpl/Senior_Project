@@ -183,6 +183,102 @@ class ReferenceWindow(QDialog):
         '''
         self.reject()
         self.close()
+
+#Class to confirm the reference point data
+class AddPointWindow(QDialog):
+    def __init__(self, parent=None):
+        super(AddPointWindow, self).__init__(parent)
+        self.resize(400, 100)
+        self.setWindowTitle('Add Map Point')
+        self.initUI()
+
+    def initUI(self):
+        '''
+        Setup GUI elements of scale window
+        '''
+        mainLayout = QVBoxLayout()
+
+        #horizontal layout containing lineedits, unit selector, and label
+        hLayout = QHBoxLayout() 
+
+        self.latEdit = LineEdit()
+        self.latEdit.setValidator(QDoubleValidator(-90, 90, 5))
+        self.latEdit.setPlaceholderText('Latitude')
+        self.latEdit.textChanged.connect(self.checkFields)
+
+        self.lonEdit = LineEdit()
+        self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))
+        self.lonEdit.setPlaceholderText('Longitude')
+        self.lonEdit.textChanged.connect(self.checkFields)
+
+        hLayout.addWidget(self.latEdit)
+        hLayout.addWidget(self.lonEdit)
+
+        #horizontal layout to hold description box
+        h2Layout = QHBoxLayout()
+        self.descBox = QTextEdit()
+        self.descBox.setFixedHeight(100)
+        self.descBox.setPlaceholderText('Description')
+        h2Layout.addWidget(self.descBox)
+
+        #horizontal layout containing save and cancel buttons
+        h3Layout = QHBoxLayout()
+        self.saveButton = Button('Save')
+        self.saveButton.clicked.connect(self.save)
+        self.saveButton.setEnabled(False)
+
+        self.cancelButton = Button('Cancel')
+        self.cancelButton.clicked.connect(self.cancel)
+
+        h3Layout.addWidget(self.saveButton)
+        h3Layout.addWidget(self.cancelButton)
+
+        mainLayout.addLayout(hLayout)
+        mainLayout.addLayout(h2Layout)
+        mainLayout.addLayout(h3Layout)
+    
+        self.setLayout(mainLayout)
+        self.setModal(True)
+        self.show()
+
+    def checkFields(self):
+        '''
+        Check if all mandatory fields are entered
+        '''
+        if self.lonEdit.text() and self.latEdit.text():
+            self.saveButton.setEnabled(True)
+        else:
+            self.saveButton.setEnabled(False)
+
+    def getConfirmedData(self):
+        return {
+            'Latitude': self.lat,
+            'Longitude': self.lon,
+            'Date': QDateTime().currentDateTime().toString('MM-dd-yyyy hh:mm:ss ap'),
+            'Description': self.desc
+        }
+
+    def save(self):
+        '''
+        Send reference point back to main window to be stored
+        '''
+        #Get text values from each element
+        self.lat = eval(self.latEdit.text())
+        self.lon = eval(self.lonEdit.text())
+        self.desc = self.descBox.toPlainText()
+
+        
+        #check values entered by user are correct
+        if self.lat >= -90 and self.lat <= 90 and self.lon >= -180 and self.lon <= 180:
+            self.accept()
+            self.close()
+
+    def cancel(self):
+        '''
+        Return to mouse tracker screen if cancel button is clicked
+        '''
+        self.reject()
+        self.close()
         
 #Class to confirm lat, lon data
 class LocationWindow(QDialog):
