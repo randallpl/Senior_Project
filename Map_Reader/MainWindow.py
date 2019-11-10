@@ -153,9 +153,13 @@ class MainWindow(QMainWindow):
         self.setScaleButton = Button('Set Scale')
         self.setScaleButton.clicked.connect(self.scaleTracker)
 
-        #Add locate button and connect it locationTracker()
-        self.locateButton = Button('Locate Point')
-        self.locateButton.clicked.connect(self.locationTracker)
+        #Add trace button and connect it locationTracker()
+        self.traceButton = Button('Trace Point')
+        self.traceButton.clicked.connect(self.locationTracker)
+
+        #Add manual input button and connect it locationTracker()
+        self.manPointButton = Button('Enter Point')
+        #self.manPointButton.clicked.connect(self.locationTracker)
 
         #Add Plot button and connect it to plotPoints()
         self.plotButton = Button('Plot')
@@ -164,7 +168,8 @@ class MainWindow(QMainWindow):
         #Add all button to horizontal layout
         hLayout.addWidget(self.addRefButton)
         hLayout.addWidget(self.setScaleButton)
-        hLayout.addWidget(self.locateButton)
+        hLayout.addWidget(self.traceButton)
+        hLayout.addWidget(self.manPointButton)
         hLayout.addWidget(self.plotButton)
 
         mainLayout.addWidget(self.table)
