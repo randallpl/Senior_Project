@@ -159,7 +159,7 @@ class MainWindow(QMainWindow):
 
         #Add manual input button and connect it locationTracker()
         self.manPointButton = Button('Enter Point')
-        #self.manPointButton.clicked.connect(self.locationTracker)
+        self.manPointButton.clicked.connect(self.manualAddWindow)
 
         #Add Plot button and connect it to plotPoints()
         self.plotButton = Button('Plot')
@@ -204,6 +204,17 @@ class MainWindow(QMainWindow):
             point = self.refWindow.getConfirmedData()
             self.reference.append(point)
             self.saveFile()
+
+    def manualAddWindow(self):
+        '''
+        Displays window to manually enter data point
+        '''
+        self.manualAddWindow = AddPointWindow(self)
+        if self.manualAddWindow.exec_():
+            point = self.manualAddWindow.getConfirmedData()
+            self.points.append(point)
+            self.saveFile()
+            self.table.update(self.points)
 
     def scaleTracker(self):
         '''
