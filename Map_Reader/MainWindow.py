@@ -393,7 +393,7 @@ class MainWindow(QMainWindow):
         '''
         Delete row from table and self.points list
         '''
-        row = self.table.getSelectedRowIndex()
+        row = self.table.getSelectedRowID()
         
         if row is False:
             return
@@ -406,7 +406,7 @@ class MainWindow(QMainWindow):
             )
 
             if choice == QMessageBox.Yes:
-                del self.points[row]
+                del self.points[row-1]
                 self.table.update(self.points)
                 self.saveFile()
             
