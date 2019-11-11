@@ -142,18 +142,12 @@ class Table(QWidget):
         for i, data in enumerate(self.data):
             self.addRow(i, data)
 
-    def getSelectedRowID(self):
-        if 'ID' not in self.columns:
-            return False
-        try:
-            idx = self.proxyModel.mapToSource(self.proxyView.selectedIndexes()[0])
-            return self.sourceModel.data(idx)
-        except:
-            return False
-
     def getSelectedRowIndex(self):
+        '''
+        Returns the index of the selected row from the source model
+        '''
         try:
-            return self.proxyView.selectedIndexes()[0].row()
+            return self.proxyModel.mapToSource(self.proxyView.selectedIndexes()[0]).row()
         except:
             return False
 
