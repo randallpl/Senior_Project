@@ -220,7 +220,7 @@ class MainWindow(QMainWindow):
         '''
         Launches window to trace scale
         '''
-        self.scaleTracker = Tracker.Tracker('scale', self)
+        self.scaleTracker = Tracker.Tracker(self)
 
     def confirmScale(self, dist_px):
         '''
@@ -241,8 +241,7 @@ class MainWindow(QMainWindow):
         if self.reference and self.scale and self.units:
             self.referenceTable = ReferenceSelectionWindow(self.reference)
             if self.referenceTable.exec_():
-                self.locationTracker = Tracker.Tracker( 
-                    'location', 
+                self.locationTracker = Tracker.TrackerLoc( 
                     self,
                     ref=self.referenceTable.selectedData, 
                     scale=self.scale, 
