@@ -15,7 +15,7 @@ from CustomQtObjects import Table
 class MainWindow(QMainWindow):
     def __init__(self, projectName, controller, reference=None, createdDate=None, openExisting=False, api=None):
         super(MainWindow, self).__init__()
-        self.setFixedSize(1080, 768)
+        self.setFixedSize(1920, 1080)
         self.controller = controller
         self.projectName = projectName
         self.api = api
@@ -134,16 +134,20 @@ class MainWindow(QMainWindow):
         #----------------------Central Widget-----------------------#
         self.cWidget = QWidget()
 
-        mainLayout = QVBoxLayout()
+        self.mapWindow = MapWindow(self.api, self.reference, self.points)
 
         self.table = Table(
             'Points', 
             self.points, 
             columns=['Latitude', 'Longitude', 'Date', 'Description'],
             index=True)
+        self.table.setFixedSize(800, 600)
 
-        #create horizontal window for storing buttons
-        hLayout = QHBoxLayout()
+        self.refDisplayTable = Table(
+            'Reference Points',
+            [{'Latitude': lat, 'Longitude': lon} for lat, lon in self.reference],
+            index=True
+        )
 
         #Add refrence button and connect it to referenceWindow()
         self.addRefButton = Button('Add Reference')
@@ -161,22 +165,24 @@ class MainWindow(QMainWindow):
         self.manPointButton = Button('Enter Point')
         self.manPointButton.clicked.connect(self.manualAddWindow)
 
-        #Add Plot button and connect it to plotPoints()
-        self.plotButton = Button('Plot')
-        self.plotButton.clicked.connect(self.plotPoints)
+        vLayout = QVBoxLayout()
+        vLayout.addWidget(self.table)
+        vLayout.addWidget(self.refDisplayTable)
 
-        #Add all button to horizontal layout
-        hLayout.addWidget(self.addRefButton)
-        hLayout.addWidget(self.setScaleButton)
-        hLayout.addWidget(self.traceButton)
-        hLayout.addWidget(self.manPointButton)
-        hLayout.addWidget(self.plotButton)
+        hLayout = QHBoxLayout()
+        hLayout.addLayout(vLayout)
+        hLayout.addWidget(self.mapWindow)
 
-        mainLayout.addWidget(self.table)
+        h2Layout = QHBoxLayout()
+        h2Layout.addWidget(self.addRefButton)
+        h2Layout.addWidget(self.setScaleButton)
+        h2Layout.addWidget(self.traceButton)
+        h2Layout.addWidget(self.manPointButton)
+
+        mainLayout = QVBoxLayout()
         mainLayout.addLayout(hLayout)
-
+        mainLayout.addLayout(h2Layout)
         self.cWidget.setLayout(mainLayout)
-
         self.setCentralWidget(self.cWidget)
 
         self.setWindowTitle(f'Map Reader - {self.projectName}')
@@ -204,6 +210,7 @@ class MainWindow(QMainWindow):
             point = self.refWindow.getConfirmedData()
             self.reference.append(point)
             self.saveFile()
+            self.refresh()
 
     def manualAddWindow(self):
         '''
@@ -214,7 +221,7 @@ class MainWindow(QMainWindow):
             point = self.manualAddWindow.getConfirmedData()
             self.points.append(point)
             self.saveFile()
-            self.table.update(self.points)
+            self.refresh()
 
     def scaleTracker(self):
         '''
@@ -258,9 +265,9 @@ class MainWindow(QMainWindow):
             self.locationTracker.close()
             data = self.locationConfirm.getConfirmedData()
             self.points.append(data)
-            self.table.update(self.points)
             self.menuExport.setEnabled(True)
             self.saveFile()
+            self.refresh()
         else:
             self.locationTracker.resetTrace()
 
@@ -276,31 +283,6 @@ class MainWindow(QMainWindow):
             #api_key was successfully saved in settings file
             if self.controller.setAPI(api_key):
                 self.api = api_key
-                return True
-        
-        return False
-
-    def plotPoints(self):
-        '''
-        Launch instance of MapWindow to plot point on google maps
-        '''
-        #Test if network is connected before prompting for api key or launching mapwindow
-        try:
-            requests.get('https://developers.google.com/maps/documentation/javascript/get-api-key', timeout=1)
-        except:
-            QMessageBox.critical(
-                self,
-                'Network Error',
-                f'No Internet Connection'
-            )
-            return
-
-        if self.api:
-            self.mapWindow = MapWindow(self.api, self.reference, self.points)
-        #No API key set, must launch window
-        else:
-            if self.launchAPISettings():
-                self.mapWindow = MapWindow(self.api, self.reference, self.points)
 
     def launchMouseSettings(self):
         '''
@@ -335,7 +317,6 @@ class MainWindow(QMainWindow):
                 'Save Error',
                 f'Project failed to be saved'
             )
-
 
     def openExistingProject(self, projectName):
         '''
@@ -391,11 +372,10 @@ class MainWindow(QMainWindow):
         '''
         Delete row from table and self.points list
         '''
-        row = self.table.getSelectedRowIndex()
+        table_row = self.table.getSelectedRowIndex()
+        #ref_row = self.refDisplayTable.getSelectedRowIndex()
         
-        if row is False:
-            return
-        else:
+        if table_row:
             choice = QMessageBox.question(
                 self, 
                 'Confirm Deletion',
@@ -404,9 +384,15 @@ class MainWindow(QMainWindow):
             )
 
             if choice == QMessageBox.Yes:
-                del self.points[row]
-                self.table.update(self.points)
+                del self.points[table_row]
                 self.saveFile()
+                self.refresh()
+    
+    def refresh(self):
+        self.table.update(self.points)
+        self.refDisplayTable.update([{'Latitude': lat, 'Longitude': lon} for lat, lon in self.reference])
+        self.mapWindow.update(self.api, self.reference, self.points)
+
             
     def keyPressEvent(self, event):
         '''

@@ -578,7 +578,7 @@ class ProjectSettingsWindow(QDialog):
         '''
         self.close()
 
-class MapWindow(QDialog):
+class MapWindow(QWidget):
     def __init__(self, api, ref, points):
         super(MapWindow, self).__init__()
         self.api = api
@@ -586,12 +586,7 @@ class MapWindow(QDialog):
         self.points = points
 
         self.resize(1080, 768)
-        self.setWindowTitle('Map')
-        self.setModal(True)
-        self.setAttribute(Qt.WA_QuitOnClose, False)
         self.initUI()
-
-        self.show()
 
     def initUI(self):
         '''
@@ -637,7 +632,13 @@ class MapWindow(QDialog):
     #pass api key to index.html
     @pyqtSlot(result=str)
     def getAPIKey(self):
-        return self.api  
+        return self.api
+
+    def update(self, api, ref, points):
+        self.api = api
+        self.ref = ref
+        self.points = points
+        self.mapView.page().runJavaScript('initMap()')
 
 '''
 About Window Class Containing Info About Project
