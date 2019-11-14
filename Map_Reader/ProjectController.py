@@ -171,10 +171,10 @@ class ProjectController():
         Rename project
         '''
         old_path = os.path.join(PROJECTS_DIR, old_name)
-        new_path = os.paht.join(PROJECTS_DIR, new_name)
+        new_path = os.path.join(PROJECTS_DIR, new_name)
 
         try:
-            os.rename(f'./Projects/{self.projectName}', f'./Projects/{name}')
+            os.rename(old_path, new_path)
         except:
             return False
         else:
