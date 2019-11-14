@@ -611,7 +611,7 @@ class LocationDisplayWidget(QWidget):
         self.bear_edit.setReadOnly(True)
         self.bear_edit.setFixedWidth(200)
 
-        self.dist2_label = QLabel(f'Distance: ({self.units}):')
+        self.dist2_label = QLabel(f'Distance ({self.units}):')
         self.dist2_label.setFixedWidth(125)
         self.dist2_edit = QLineEdit()
         self.dist2_edit.setReadOnly(True)
