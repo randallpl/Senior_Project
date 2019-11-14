@@ -242,10 +242,10 @@ class MainWindow(QMainWindow):
             self.referenceTable = ReferenceSelectionWindow(self.reference)
             if self.referenceTable.exec_():
                 self.locationTracker = Tracker.TrackerLoc( 
-                    self,
-                    ref=self.referenceTable.selectedData, 
-                    scale=self.scale, 
-                    units=self.units
+                    self.referenceTable.selectedData, 
+                    self.scale, 
+                    self.units,
+                    parent=self
                 )
 
     def confirmLocation(self, lat, lon):

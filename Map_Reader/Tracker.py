@@ -1,14 +1,15 @@
 import sys
 from PyQt5.QtCore import Qt, QDateTime
-from PyQt5.QtWidgets import QGridLayout, QLabel, QApplication, QDialog, QMessageBox
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QCursor, QFont
 from geopy.distance import geodesic
 from collections import namedtuple
 import math
-from statistics import mean
 from MouseController import MouseController
 import numpy as np
 import pandas as pd
+
+from CustomQtObjects import *
 
 #Dependencies
 #PyQt5: conda install -c anaconda pyqt 
@@ -21,12 +22,10 @@ Point = namedtuple('Point', 'x y')
 #Two modes: scale and location
 class Tracker(QDialog):
 
-    def __init__(self, parent=None, hidden=True, scale=None, units=None):
+    def __init__(self, parent=None, hidden=True):
         super(Tracker, self).__init__(parent)
 
         self.hidden = hidden
-        self.scale = scale
-        self.units = units
 
         self.mouseController = MouseController()
         self.origMouseSpeed = self.mouseController.getSpeed()
@@ -43,16 +42,12 @@ class Tracker(QDialog):
         Setup GUI elements of mouse tracker screen.
         '''      
         grid = QGridLayout()
+        grid.setContentsMargins(80, 80, 80, 80)
 
-        #Increase font size and set window dimensions
-        font = QFont()
-        font.setPointSize(14)
-        self.label = QLabel()
-        self.label.setFont(font)          
-        grid.addWidget(self.label, 0, 0, Qt.AlignTop)
+        self.displayBox = ScaleDisplayWidget()      
+        grid.addWidget(self.displayBox, 0, 0, Qt.AlignTop)
+        grid.addWidget(QLabel(''), 0, 1, Qt.AlignTop)
         self.setLayout(grid)
-        self.updateLabel()
-
         self.setWindowTitle('Scale')
         self.setModal(True)
         self.showFullScreen()
@@ -230,10 +225,11 @@ class Tracker(QDialog):
         '''
         Constantly update data on window label
         '''
-        results = f'\n\tdx_px: {self.dx + self.temp_dx}\n'
-        results += f'\tdy_px: {self.dy + self.temp_dy}\n'
-        results += f'\tDistance_px: {self.dist_px}\n'
-        self.label.setText(results)
+        dx_update = self.dx + self.temp_dx
+        dy_update = self.dy + self.temp_dy
+        dist_update = self.dist_px
+        
+        self.displayBox.update(dx_update, dy_update, dist_update)
 
     def update(self):
         '''
@@ -310,34 +306,33 @@ class Tracker(QDialog):
 
 class TrackerLoc(Tracker):
 
-    def __init__(self, parent=None, hidden=True, ref=None, scale=None, units=None):
+    def __init__(self, ref, scale, units, parent=None, hidden=True):
         self.ref = ref
+        self.scale = scale
+        self.units = units
         self.refIter = iter(ref)
         self.currentRef = next(self.refIter)
         self.traceData = []
-        super(TrackerLoc, self).__init__(parent, hidden, scale, units)
+        super(TrackerLoc, self).__init__(parent, hidden)
 
     def initUI(self):
         '''
         Setup GUI elements of mouse tracker screen.
         '''      
         grid = QGridLayout()
+        grid.setContentsMargins(80, 80, 80, 80)
 
-        #Increase font size and set window dimensions
-        font = QFont()
-        font.setPointSize(14)
-        self.label = QLabel()
-        self.label.setFont(font)          
-        grid.addWidget(self.label, 0, 0, Qt.AlignTop)
+        self.displayBox = LocationDisplayWidget(self.units)          
+        grid.addWidget(self.displayBox, 0, 0, Qt.AlignTop)
+        grid.addWidget(QLabel(''), 0, 1, Qt.AlignTop)
         self.setLayout(grid)
-        self.updateLabel()
 
         self.setWindowTitle('Location')
         self.setModal(True)
         self.showFullScreen()
         QMessageBox.information(self,
                 'Tracing Prompt',
-                'Begin tracing from first reference point:\n\n'+'Latitude - '+str(self.currentRef[0])+'\nLongitude - '+str(self.currentRef[1]),
+                'Begin tracing from first reference point:\n\n'+'Latitude: '+str(self.currentRef[0])+'\nLongitude: '+str(self.currentRef[1]),
                 QMessageBox.Ok
             )
 
@@ -376,7 +371,7 @@ class TrackerLoc(Tracker):
             self.currentRef = next(self.refIter)
             QMessageBox.information(self,
                 'Tracing Prompt',
-                'Begin tracing from next reference point:\n\n'+'Latitude - '+str(self.currentRef[0])+'\nLongitude - '+str(self.currentRef[1]),
+                'Begin tracing from next reference point:\n\n'+'Latitude: '+str(self.currentRef[0])+'\nLongitude: '+str(self.currentRef[1]),
                 QMessageBox.Ok
             )
         except StopIteration:
@@ -479,15 +474,23 @@ class TrackerLoc(Tracker):
         '''
         Constantly update data on window label
         '''
-        results = f'\n\tdx_px: {self.dx + self.temp_dx}\n'
-        results += f'\tdy_px: {self.dy + self.temp_dy}\n'
-        results += f'\tDistance_px: {self.dist_px}\n'
-        results += f'\n\tReference: {self.currentRef}\n'
-        results += f'\tBearing: {self.bearing}\n'
-        results += f'\tDistance_{self.units}: {self.dist}\n'
-        results += f'\tNew Location: {self.newLoc.x, self.newLoc.y}'
+        dx = self.dx + self.temp_dx
+        dy = self.dy + self.temp_dy
+        distpx = self.dist_px
+        ref = self.currentRef
+        bearing = self.bearing
+        dist = self.dist
+        new_loc = (self.newLoc.x, self.newLoc.y)
 
-        self.label.setText(results)
+        self.displayBox.update(
+            dx,
+            dy,
+            distpx,
+            ref,
+            bearing,
+            dist,
+            new_loc
+        )
     
     def update(self):
         '''
@@ -518,10 +521,139 @@ class TrackerLoc(Tracker):
 
         self.updateLabel()
 
+class ScaleDisplayWidget(QWidget):
+    def __init__(self, parent=None):
+        super(ScaleDisplayWidget, self).__init__(parent)
+        self.setFixedSize(280, 150)
+        self.initUI()
+        self.update(0, 0, 0)
+
+    def initUI(self):
+        '''
+        Setup GUI elements of scale window
+        '''
+        mainLayout = QGridLayout()
+
+        self.dx_label = QLabel('DX (px):')
+        self.dx_label.setFixedWidth(105)
+        self.dx_edit = QLineEdit()
+        self.dx_edit.setReadOnly(True)
+        self.dx_edit.setFixedWidth(150)
+
+        self.dy_label = QLabel('DY (px):')
+        self.dy_label.setFixedWidth(105)
+        self.dy_edit = QLineEdit()
+        self.dy_edit.setReadOnly(True)
+        self.dy_edit.setFixedWidth(150)
+
+        self.dist_label = QLabel('Distance (px):')
+        self.dist_label.setFixedWidth(105)
+        self.dist_edit = QLineEdit()
+        self.dist_edit.setReadOnly(True)
+        self.dist_edit.setFixedWidth(150)
+
+        mainLayout.addWidget(self.dx_label, 0, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dx_edit, 0, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.dy_label, 1, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dy_edit, 1, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.dist_label, 2, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dist_edit, 2, 1, Qt.AlignLeft)
+    
+        self.setLayout(mainLayout)
+        self.show()
+
+    def update(self, dx, dy, dist):
+        self.dx_edit.setText(str(dx))
+        self.dy_edit.setText(str(dy))
+        self.dist_edit.setText(str(dist))
+
+class LocationDisplayWidget(QWidget):
+    def __init__(self, units, parent=None):
+        super(LocationDisplayWidget, self).__init__(parent)
+        self.units = units
+        self.setFixedSize(350, 300)
+        self.initUI()
+        self.update(0, 0, 0, (0, 0), 0, 0, (0, 0))
+
+    def initUI(self):
+        '''
+        Setup GUI elements of scale window
+        '''
+        mainLayout = QGridLayout()
+
+        self.dx_label = QLabel('DX (px):')
+        self.dx_label.setFixedWidth(125)
+        self.dx_edit = QLineEdit()
+        self.dx_edit.setReadOnly(True)
+        self.dx_edit.setFixedWidth(200)
+
+        self.dy_label = QLabel('DY (px):')
+        self.dy_label.setFixedWidth(125)
+        self.dy_edit = QLineEdit()
+        self.dy_edit.setReadOnly(True)
+        self.dy_edit.setFixedWidth(200)
+
+        self.dist_label = QLabel('Distance (px):')
+        self.dist_label.setFixedWidth(125)
+        self.dist_edit = QLineEdit()
+        self.dist_edit.setReadOnly(True)
+        self.dist_edit.setFixedWidth(200)
+
+        self.ref_label = QLabel('Reference:')
+        self.ref_label.setFixedWidth(125)
+        self.ref_edit = QLineEdit()
+        self.ref_edit.setReadOnly(True)
+        self.ref_edit.setFixedWidth(200)
+
+        self.bear_label = QLabel('Bearing (deg):')
+        self.bear_label.setFixedWidth(125)
+        self.bear_edit = QLineEdit()
+        self.bear_edit.setReadOnly(True)
+        self.bear_edit.setFixedWidth(200)
+
+        self.dist2_label = QLabel(f'Distance: ({self.units}):')
+        self.dist2_label.setFixedWidth(125)
+        self.dist2_edit = QLineEdit()
+        self.dist2_edit.setReadOnly(True)
+        self.dist2_edit.setFixedWidth(200)
+
+        self.new_label = QLabel('Location:')
+        self.new_label.setFixedWidth(125)
+        self.new_edit = QLineEdit()
+        self.new_edit.setReadOnly(True)
+        self.new_edit.setFixedWidth(200)
+
+        mainLayout.addWidget(self.dx_label, 0, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dx_edit, 0, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.dy_label, 1, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dy_edit, 1, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.dist_label, 2, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dist_edit, 2, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.ref_label, 3, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.ref_edit, 3, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.bear_label, 4, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.bear_edit, 4, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.dist2_label, 5, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.dist2_edit, 5, 1, Qt.AlignLeft)
+        mainLayout.addWidget(self.new_label, 6, 0, Qt.AlignLeft)
+        mainLayout.addWidget(self.new_edit, 6, 1, Qt.AlignLeft)
+    
+        self.setLayout(mainLayout)
+        self.show()
+
+    def update(self, dx, dy, dist, ref, bearing, dist_unit, new_loc):
+        self.dx_edit.setText(str(dx))
+        self.dy_edit.setText(str(dy))
+        self.dist_edit.setText(str(dist))
+        self.ref_edit.setText(str(ref))
+        self.bear_edit.setText(str(bearing))
+        self.dist2_edit.setText(str(dist_unit))
+        self.new_edit.setText(str(new_loc))
+
 if __name__ == '__main__':
 
     import sys
 
     app = QApplication(sys.argv)
-    window = TrackerLoc('location', ref=[(1,2), (3,4), (5,6)], scale=100, units='km')
+    window = LocationDisplayWidget('km')
     sys.exit(app.exec_())
