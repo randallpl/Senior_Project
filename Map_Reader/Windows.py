@@ -449,10 +449,8 @@ class MouseSettingsWindow(QDialog):
         self.close()
 
 class APIKeyWindow(QDialog):
-    def __init__(self, plot=False, parent=None):
-        super(APIKeyWindow, self).__init__(parent)
-        self.plot = plot
-        
+    def __init__(self, parent=None):
+        super(APIKeyWindow, self).__init__(parent)        
         self.setWindowTitle('Enter API Key')
         self.setAttribute(Qt.WA_QuitOnClose, False)
         self.setModal(True)
@@ -502,18 +500,22 @@ class APIKeyWindow(QDialog):
         if self.apiKeyEdit.text():
             self.saveButton.setEnabled(True)
 
+    def getConfirmedData(self):
+        return self.apiKeyEdit.text()
+
     def save(self):
         '''
         Send scale and unit values entered by user back to mouse tracker
         screen when save button is clicked.
         '''
-        self.parent().setAPI(self.apiKeyEdit.text(), self.plot)
+        self.accept()
         self.close()
 
     def cancel(self):
         '''
         Return to mouse tracker screen if cancel button is clicked
         '''
+        self.reject()
         self.close()
 
 class ProjectSettingsWindow(QDialog):

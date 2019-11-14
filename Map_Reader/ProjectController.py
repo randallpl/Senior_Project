@@ -37,15 +37,19 @@ class ProjectController():
         with open(SETTINGS_PATH, 'rt') as f:
             self.settings = json.loads(f.read())
 
-        self.saveSettings()
         self.loadTheme(self.settings.get('Theme'))
 
     def saveSettings(self):
         '''
         Save updated settings data 
         '''
-        with open(SETTINGS_PATH, 'w+') as f:
-            f.write(json.dumps(self.settings))
+        try:
+            with open(SETTINGS_PATH, 'w+') as f:
+                f.write(json.dumps(self.settings))
+        except:
+            return False
+        else:
+            return True
 
     def loadTheme(self, theme=None):
         '''
@@ -61,13 +65,22 @@ class ProjectController():
         self.settings['Theme'] = theme
         self.saveSettings()
 
+    def setAPI(self, api_key):
+        '''
+        Save api key to settings file
+        '''
+        self.settings['API'] = api_key
+        return self.saveSettings()
+
+
     def createSettingsFile(self):
         '''
         Create settings directory and settings.json file if it doesn't exist
         this function should only be called on first launch of application
         '''
         default_data = {
-            'Theme': None
+            'Theme': None,
+            'API': None
         }
         os.mkdir(SETTINGS_DIR)
         with open(SETTINGS_PATH, 'w+') as f:
@@ -114,7 +127,7 @@ class ProjectController():
             )
         else:
             window_ref.close()
-            self.mw = MainWindow(project_name, self, openExisting=True)
+            self.mw = MainWindow(project_name, self, openExisting=True, api=self.settings.get('API'))
 
     def closeProject(self):
         '''
@@ -143,7 +156,7 @@ class ProjectController():
         
         if os.path.exists(path):
             window_ref.close()
-            self.mw = MainWindow(project_name, self, openExisting=True)
+            self.mw = MainWindow(project_name, self, openExisting=True, api=self.settings.get('API'))
             #alert for invalid project and return to main window or starter screen
         else:
             QMessageBox.critical(

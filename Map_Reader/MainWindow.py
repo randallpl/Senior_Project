@@ -13,18 +13,18 @@ from Windows import *
 from CustomQtObjects import Table
 
 class MainWindow(QMainWindow):
-    def __init__(self, projectName, controller, reference=None, createdDate=None, openExisting=False):
+    def __init__(self, projectName, controller, reference=None, createdDate=None, openExisting=False, api=None):
         super(MainWindow, self).__init__()
         self.setFixedSize(1080, 768)
         self.controller = controller
         self.projectName = projectName
+        self.api = api
         self.scale = None
         self.reference = reference
         self.units = None
         self.points = []
         self.savedPoints = []
         self.createdDate = createdDate
-        self.api = None
 
         #Open existing json file containing all data
         if openExisting:
@@ -264,21 +264,21 @@ class MainWindow(QMainWindow):
         else:
             self.locationTracker.resetTrace()
 
-    def setAPI(self, api_key, plot):
-        '''
-        Set api key with key provided from APIKeyWindow
-        '''
-        self.api = api_key
-        self.saveFile()
-
-        if plot:
-            self.mapWindow = MapWindow(self.api, self.reference, self.points)
-
     def launchAPISettings(self):
         '''
         Launch API key window to update API key from settings menu
         '''
-        self.apiKeyWindow = APIKeyWindow(parent=self)
+        self.apiKeyWindow = APIKeyWindow(self)
+
+        if self.apiKeyWindow.exec_():
+            api_key = self.apiKeyWindow.getConfirmedData()
+
+            #api_key was successfully saved in settings file
+            if self.controller.setAPI(api_key):
+                self.api = api_key
+                return True
+        
+        return False
 
     def plotPoints(self):
         '''
@@ -299,7 +299,8 @@ class MainWindow(QMainWindow):
             self.mapWindow = MapWindow(self.api, self.reference, self.points)
         #No API key set, must launch window
         else:
-            self.apiKeyWindow = APIKeyWindow(plot=True, parent=self)
+            if self.launchAPISettings():
+                self.mapWindow = MapWindow(self.api, self.reference, self.points)
 
     def launchMouseSettings(self):
         '''
@@ -325,7 +326,6 @@ class MainWindow(QMainWindow):
             'Scale': self.scale,
             'Units': self.units,
             'Points': self.points,
-            'APIKey': self.api,
         }
         if self.controller.saveProject(self.projectName, savestate):
             pass
@@ -350,7 +350,6 @@ class MainWindow(QMainWindow):
             self.scale = data.get('Scale')
             self.units = data.get('Units')
             self.points = data.get('Points')
-            self.api = data.get('APIKey')
         else:
             QMessageBox.critical(
                 self,
