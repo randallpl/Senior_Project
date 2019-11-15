@@ -15,7 +15,7 @@ from CustomQtObjects import Table
 class MainWindow(QMainWindow):
     def __init__(self, projectName, controller, reference=None, createdDate=None, openExisting=False, api=None):
         super(MainWindow, self).__init__()
-        self.setFixedSize(1920, 1080)
+        self.resize(1920, 1080)
         self.controller = controller
         self.projectName = projectName
         self.api = api
@@ -135,6 +135,8 @@ class MainWindow(QMainWindow):
         self.cWidget = QWidget()
 
         self.mapWindow = MapWindow(self.api, self.reference, self.points)
+        self.mapWindow.setMinimumWidth(800)
+        self.mapWindow.setMinimumHeight(600)
 
         self.table = Table(
             'Points', 
@@ -148,6 +150,7 @@ class MainWindow(QMainWindow):
             [{'Latitude': lat, 'Longitude': lon} for lat, lon in self.reference],
             index=True
         )
+        self.refDisplayTable.setMinimumHeight(250)
 
         #Add refrence button and connect it to referenceWindow()
         self.addRefButton = Button('Add Reference')
@@ -373,13 +376,13 @@ class MainWindow(QMainWindow):
         Delete row from table and self.points list
         '''
         table_row = self.table.getSelectedRowIndex()
-        #ref_row = self.refDisplayTable.getSelectedRowIndex()
+        ref_row = self.refDisplayTable.getSelectedRowIndex()
         
-        if table_row:
+        if table_row is not False:
             choice = QMessageBox.question(
                 self, 
-                'Confirm Deletion',
-                'Are you sure you want to delete?',
+                'Confirm Point Deletion',
+                f'Are you sure you want to delete point {table_row + 1}?',
                 QMessageBox.Yes | QMessageBox.No
             )
 
@@ -387,13 +390,32 @@ class MainWindow(QMainWindow):
                 del self.points[table_row]
                 self.saveFile()
                 self.refresh()
-    
+        
+        elif ref_row is not False:
+            if len(self.reference) == 1:
+                QMessageBox.information(
+                    self,
+                    'Reference Point Error',
+                    f'You must have at least one reference point'
+                )
+            else:
+                choice = QMessageBox.question(
+                    self, 
+                    'Confirm Point Deletion',
+                    f'Are you sure you want to delete reference point {ref_row + 1}?',
+                    QMessageBox.Yes | QMessageBox.No
+                )
+
+                if choice == QMessageBox.Yes:
+                    del self.reference[ref_row]
+                    self.saveFile()
+                    self.refresh()
+
     def refresh(self):
         self.table.update(self.points)
         self.refDisplayTable.update([{'Latitude': lat, 'Longitude': lon} for lat, lon in self.reference])
         self.mapWindow.update(self.api, self.reference, self.points)
 
-            
     def keyPressEvent(self, event):
         '''
         Handle key events

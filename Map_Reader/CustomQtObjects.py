@@ -34,6 +34,15 @@ class LineEdit(QLineEdit):
         QLineEdit.focusOutEvent(self, event)
         self.setGraphicsEffect(None)
 
+class DeselectableTreeView(QTreeView):
+    def mousePressEvent(self, e):
+        self.clearSelection()
+        QTreeView.mousePressEvent(self, e)
+
+    def focusOutEvent(self, event):
+        QTreeView.focusOutEvent(self, event)
+        self.clearSelection()
+
 class Table(QWidget):
     def __init__(self, name, data, columns=None, index=False, checkable=False, parent=None):
         QWidget.__init__(self, parent)
@@ -74,7 +83,7 @@ class Table(QWidget):
         
         self.proxyGroupBox = QGroupBox(self.name)
 
-        self.proxyView = QTreeView()
+        self.proxyView = DeselectableTreeView()
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.proxyModel)
@@ -88,8 +97,7 @@ class Table(QWidget):
 
         mainLayout.addWidget(self.proxyGroupBox)
         self.setLayout(mainLayout)
-        self.update(self.data)
-        
+        self.update(self.data)  
     
     def setSourceModel(self, model):
         self.proxyModel.setSourceModel(model)
