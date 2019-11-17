@@ -49,13 +49,15 @@ class Tracker(QDialog):
         grid.addWidget(QLabel(''), 0, 1, Qt.AlignTop)
         self.setLayout(grid)
         self.setWindowTitle('Scale')
-        self.setModal(True)
         self.showFullScreen()
-        QMessageBox.information(self,
-                'Tracing Prompt',
-                'Begin tracing scale',
-                QMessageBox.Ok
-            )
+        self.setModal(True)
+        QMessageBox.information(
+            self,
+            'Tracing Prompt',
+            'Begin tracing scale',
+            QMessageBox.Ok
+        )
+        
         
     def getCenter(self):
         '''
@@ -326,15 +328,15 @@ class TrackerLoc(Tracker):
         grid.addWidget(self.displayBox, 0, 0, Qt.AlignTop)
         grid.addWidget(QLabel(''), 0, 1, Qt.AlignTop)
         self.setLayout(grid)
-
         self.setWindowTitle('Location')
-        self.setModal(True)
         self.showFullScreen()
-        QMessageBox.information(self,
-                'Tracing Prompt',
-                'Begin tracing from first reference point:\n\n'+'Latitude: '+str(self.currentRef[0])+'\nLongitude: '+str(self.currentRef[1]),
-                QMessageBox.Ok
-            )
+        self.setModal(True)
+        QMessageBox.information(
+            self,
+            'Tracing Prompt',
+            'Begin tracing from first reference point:\n\n'+'Latitude: '+str(self.currentRef[0])+'\nLongitude: '+str(self.currentRef[1]),
+            QMessageBox.Ok
+        )
 
     def mouseReleaseEvent(self, e):
         '''
@@ -560,7 +562,6 @@ class ScaleDisplayWidget(QWidget):
         mainLayout.addWidget(self.dist_edit, 2, 1, Qt.AlignLeft)
     
         self.setLayout(mainLayout)
-        self.show()
 
     def update(self, dx, dy, dist):
         self.dx_edit.setText(str(dx))
@@ -639,7 +640,6 @@ class LocationDisplayWidget(QWidget):
         mainLayout.addWidget(self.new_edit, 6, 1, Qt.AlignLeft)
     
         self.setLayout(mainLayout)
-        self.show()
 
     def update(self, dx, dy, dist, ref, bearing, dist_unit, new_loc):
         self.dx_edit.setText(str(dx))

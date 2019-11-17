@@ -88,6 +88,7 @@ class Table(QWidget):
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.proxyModel)
         self.proxyView.setSortingEnabled(not self.checkable)
+        self.proxyView.sortByColumn(0, Qt.AscendingOrder)
 
         self.proxyView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 

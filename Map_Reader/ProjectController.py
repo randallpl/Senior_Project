@@ -95,7 +95,8 @@ class ProjectController():
         if self.npw.exec_():
             project_name = self.npw.dataPage.getProjectName()
             ref = self.npw.dataPage.getReferencePoint()
-            self.createProject(window_ref, project_name, ref)
+            if project_name and ref:
+                self.createProject(window_ref, project_name, ref)
 
     def createProject(self, window_ref, project_name, ref):
         '''

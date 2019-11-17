@@ -8,6 +8,7 @@ from PyQt5.QtWebChannel import QWebChannel
 from statistics import mean
 import webbrowser
 from functools import partial
+from geopy import Point
 
 from MouseController import MouseController
 from CustomQtObjects import Button, LineEdit, Table
@@ -121,12 +122,10 @@ class ReferenceWindow(QDialog):
         hLayout = QHBoxLayout() 
 
         self.latEdit = LineEdit()
-        self.latEdit.setValidator(QDoubleValidator(-90, 90, 5))
         self.latEdit.setPlaceholderText('Latitude')
         self.latEdit.textChanged.connect(self.checkFields)
 
         self.lonEdit = LineEdit()
-        self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))
         self.lonEdit.setPlaceholderText('Longitude')
         self.lonEdit.textChanged.connect(self.checkFields)
 
@@ -156,7 +155,10 @@ class ReferenceWindow(QDialog):
         '''
         Check if all mandatory fields are entered
         '''
-        if self.lonEdit.text() and self.latEdit.text():
+        lat = self.latEdit.text()
+        lon = self.lonEdit.text()
+
+        if lat and lon:
             self.saveButton.setEnabled(True)
         else:
             self.saveButton.setEnabled(False)
@@ -168,14 +170,23 @@ class ReferenceWindow(QDialog):
         '''
         Send reference point back to main window to be stored
         '''
-        #Get text values from each element
-        self.lat = eval(self.latEdit.text())
-        self.lon = eval(self.lonEdit.text())
-        
-        #check values entered by user are correct
-        if self.lat >= -90 and self.lat <= 90 and self.lon >= -180 and self.lon <= 180:
+        lat = self.latEdit.text()
+        lon = self.lonEdit.text()
+
+        try:
+            point = Point(lat + ' ' + lon)
+        except:
+            QMessageBox.information(
+                self,
+                'Reference Point Error',
+                f'Invalid reference point: ({lat}, {lon})'
+            )
+        else:
+            self.lat = round(point.latitude, 6)
+            self.lon = round(point.longitude, 6)
             self.accept()
             self.close()
+            
 
     def cancel(self):
         '''
@@ -202,12 +213,10 @@ class AddPointWindow(QDialog):
         hLayout = QHBoxLayout() 
 
         self.latEdit = LineEdit()
-        self.latEdit.setValidator(QDoubleValidator(-90, 90, 5))
         self.latEdit.setPlaceholderText('Latitude')
         self.latEdit.textChanged.connect(self.checkFields)
 
         self.lonEdit = LineEdit()
-        self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))
         self.lonEdit.setPlaceholderText('Longitude')
         self.lonEdit.textChanged.connect(self.checkFields)
 
@@ -263,13 +272,24 @@ class AddPointWindow(QDialog):
         Send reference point back to main window to be stored
         '''
         #Get text values from each element
-        self.lat = eval(self.latEdit.text())
-        self.lon = eval(self.lonEdit.text())
+        lat = self.latEdit.text()
+        lon = self.lonEdit.text()
         self.desc = self.descBox.toPlainText()
 
-        
-        #check values entered by user are correct
-        if self.lat >= -90 and self.lat <= 90 and self.lon >= -180 and self.lon <= 180:
+        lat = self.latEdit.text()
+        lon = self.lonEdit.text()
+
+        try:
+            point = Point(lat + ' ' + lon)
+        except:
+            QMessageBox.information(
+                self,
+                'Point Location Error',
+                f'Invalid location: ({lat}, {lon})'
+            )
+        else:
+            self.lat = round(point.latitude, 6)
+            self.lon = round(point.longitude, 6)
             self.accept()
             self.close()
 
@@ -301,12 +321,10 @@ class LocationWindow(QDialog):
         #horizontal layout containing lineedits, unit selector, and label
         hLayout = QHBoxLayout() 
         self.latEdit = LineEdit(str(self.lat))
-        self.latEdit.setValidator(QDoubleValidator(-90, 90, 5)) 
         self.latEdit.textChanged.connect(self.checkFields)
         hLayout.addWidget(self.latEdit)
 
         self.lonEdit = LineEdit(str(self.lon))
-        self.lonEdit.setValidator(QDoubleValidator(-180, 180, 5))   
         self.lonEdit.textChanged.connect(self.checkFields)
         hLayout.addWidget(self.lonEdit)
 
@@ -355,13 +373,24 @@ class LocationWindow(QDialog):
         Send scale and unit values entered by user back to mouse mainwindow
         screen when save button is clicked.
         '''
-        #Get text values from each element
-        self.lat = eval(self.latEdit.text())
-        self.lon = eval(self.lonEdit.text())
+        lat = self.latEdit.text()
+        lon = self.lonEdit.text()
         self.desc = self.descBox.toPlainText()
-        
-        #check values entered by user are correct
-        if self.lat >= -90 and self.lat <= 90 and self.lon >= -180 and self.lon <= 180:
+
+        lat = self.latEdit.text()
+        lon = self.lonEdit.text()
+
+        try:
+            point = Point(lat + ' ' + lon)
+        except:
+            QMessageBox.information(
+                self,
+                'Point Location Error',
+                f'Invalid location: ({lat}, {lon})'
+            )
+        else:
+            self.lat = round(point.latitude, 6)
+            self.lon = round(point.longitude, 6)
             self.accept()
             self.close()
 

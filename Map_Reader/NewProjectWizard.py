@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt, QDateTime, QRegExp
 from PyQt5.QtWidgets import *
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
+from geopy import Point
 
 #Class to display new project wizard
 class NewProjectWizard(QWizard):
@@ -14,8 +15,6 @@ class NewProjectWizard(QWizard):
         self.addPage(self.createConclusionPage())
 
         self.setWindowTitle('New Project Wizard')
-        self.button(QWizard.FinishButton).clicked.connect(self.startNewProject)
-        self.button(QWizard.CancelButton).clicked.connect(self.cancel)
         self.setModal(True)
         self.show()
 
@@ -52,16 +51,6 @@ class NewProjectWizard(QWizard):
 
         return page
 
-    def startNewProject(self):
-        '''
-        Launch main window of application when wizard completes and all data is validated
-        '''
-        name = self.dataPage.getProjectName()
-        refPoint = self.dataPage.getReferencePoint()
-
-        if self.parent():
-            self.parent().createProject(name, refPoint)
-
     def cancel(self):
         '''
         Return to starter screen when cancel is pressed
@@ -91,12 +80,10 @@ class WizardDataPage(QWizardPage):
         self.refLabel = QLabel("Reference Point:")
         self.latLineEdit = QLineEdit()
         self.latLineEdit.setPlaceholderText('Latitude')
-        self.latLineEdit.setValidator(QtGui.QDoubleValidator(-90.00000, 90.00000, 5))
         self.registerField('latitude*', self.latLineEdit)
 
         self.lonLineEdit = QLineEdit()
         self.lonLineEdit.setPlaceholderText('Longitude')
-        self.lonLineEdit.setValidator(QtGui.QDoubleValidator(-180.00000, 180.00000, 5))
         self.registerField('longitude*', self.lonLineEdit)
 
         self.mapGraphic = QLabel(self)
@@ -128,7 +115,19 @@ class WizardDataPage(QWizardPage):
         '''
         Returns reference lat/lon as tuple from latLineEdit and lonLineEdit fields
         '''
-        lat = eval(self.latLineEdit.text())
-        lon = eval(self.lonLineEdit.text())
+        lat = self.latLineEdit.text()
+        lon = self.lonLineEdit.text()
 
-        return [(lat, lon)]
+        try:
+            point = Point(lat + ' ' + lon)
+        except:
+            QMessageBox.information(
+                    self,
+                    'Reference Point Error',
+                    f'Invalid reference point: ({lat}, {lon})'
+                )
+            return False
+        else:
+            lat = round(point.latitude, 6)
+            lon = round(point.longitude, 6)
+            return [(lat, lon)]
