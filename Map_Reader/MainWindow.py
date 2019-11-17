@@ -91,18 +91,28 @@ class MainWindow(QMainWindow):
         self.menuMouseSettings.setShortcut("Ctrl+M")
         self.menuMouseSettings.setStatusTip('Mouse Settings')
         self.menuMouseSettings.triggered.connect(self.launchMouseSettings)
+        self.settingsMenu.addAction(self.menuMouseSettings)
 
         self.menuProjectSettings = QAction("Edit Project Data", self)
         self.menuProjectSettings.setShortcut("Ctrl+P")
         self.menuProjectSettings.setStatusTip('Project Data')
         self.menuProjectSettings.triggered.connect(self.launchProjectSettings)
+        self.settingsMenu.addAction(self.menuProjectSettings)
 
         self.menuAPISettings = QAction("Add API Key", self)
         self.menuAPISettings.setShortcut("Ctrl+I")
         self.menuAPISettings.setStatusTip('API Key')
         self.menuAPISettings.triggered.connect(self.launchAPISettings)
+        self.settingsMenu.addAction(self.menuAPISettings)
 
         self.viewMenu = menubar.addMenu('View')
+
+        self.menuRefresh = QAction("Refresh", self)
+        self.menuRefresh.setShortcut("Ctrl+R")
+        self.menuRefresh.setStatusTip('Refresh')
+        self.menuRefresh.triggered.connect(self.refresh)
+        self.viewMenu.addAction(self.menuRefresh)
+
         self.menuTheme = QMenu('Theme', self)
 
         self.themeBlack = QAction('Black', self)
@@ -117,17 +127,9 @@ class MainWindow(QMainWindow):
         self.menuTheme.addAction(self.themeGreen)
         self.themeGreen.triggered.connect(partial(self.controller.loadTheme, 'Green'))
 
-        self.themeTest = QAction('Test', self)
-        self.menuTheme.addAction(self.themeTest)
-        self.themeTest.triggered.connect(partial(self.controller.loadTheme, 'Test'))
-
         self.themeDefault = QAction('Default', self)
         self.menuTheme.addAction(self.themeDefault)
         self.themeDefault.triggered.connect(partial(self.controller.loadTheme))
-
-        self.settingsMenu.addAction(self.menuMouseSettings)
-        self.settingsMenu.addAction(self.menuProjectSettings)
-        self.settingsMenu.addAction(self.menuAPISettings)
 
         self.viewMenu.addMenu(self.menuTheme)
 
