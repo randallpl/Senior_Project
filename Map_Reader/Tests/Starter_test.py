@@ -14,8 +14,8 @@ def test_1(qtbot, window):
     Test if the about page loads
     '''
     qtbot.mouseClick(window.aboutButton, QtCore.Qt.LeftButton)
-
     assert window.aboutScreen.isActiveWindow() == True
+    window.close()
 
 def test_2(qtbot, window):
     '''

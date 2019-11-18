@@ -74,6 +74,7 @@ def test_6(qtbot, window):
     qtbot.mouseClick(window.saveButton, QtCore.Qt.LeftButton)
 
     assert window.isActiveWindow() == True
+    window.close()
 
 def test_7(qtbot, window):
     '''

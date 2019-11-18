@@ -1,5 +1,6 @@
 from Map_Reader.Windows import LocationWindow
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QMessageBox
 import pytest
 
 @pytest.fixture
@@ -11,17 +12,16 @@ def test_1(qtbot, window):
     '''
     Test if all field are populated and save button is enabled by default
     '''
-    qtbot.addWidget(window)
-
     assert window.latEdit.text() == '38.12345'
     assert window.lonEdit.text() == '-121.12345'
     assert window.descBox.toPlainText() == ''
     assert window.saveButton.isEnabled() == True
 
-def test_2(qtbot, window):
+def test_2(qtbot, mocker, window):
     '''
     Test lat, lon values below -90, -180 can't be saved
     '''
+    mocker.patch.object(QMessageBox, 'information', return_value=QMessageBox.Ok)
 
     window.latEdit.setText(None)
     window.lonEdit.setText(None)
@@ -31,12 +31,14 @@ def test_2(qtbot, window):
     qtbot.mouseClick(window.saveButton, QtCore.Qt.LeftButton)
 
     assert window.isActiveWindow() == True
+    window.close()
 
-def test_3(qtbot, window):
+def test_3(qtbot, mocker, window):
     '''
     Test lat, lon values above 90, 180 can't be saved
     '''
-
+    mocker.patch.object(QMessageBox, 'information', return_value=QMessageBox.Ok)
+    
     window.latEdit.setText(None)
     window.lonEdit.setText(None)
 
@@ -45,6 +47,7 @@ def test_3(qtbot, window):
     qtbot.mouseClick(window.saveButton, QtCore.Qt.LeftButton)
 
     assert window.isActiveWindow() == True
+    window.close()
 
 def test_5(qtbot, window):
     '''
