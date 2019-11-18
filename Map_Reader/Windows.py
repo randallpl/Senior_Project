@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QDoubleValidator, QRegExpValidator
 from PyQt5.QtCore import Qt, QRegExp, QDateTime
 from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import Qt, QUrl, pyqtSlot
+from PyQt5.QtCore import Qt, QUrl, pyqtSlot, qInstallMessageHandler
 from PyQt5.QtWebChannel import QWebChannel
 from statistics import mean
 import webbrowser
@@ -610,6 +610,7 @@ class ProjectSettingsWindow(QDialog):
 class MapWindow(QWidget):
     def __init__(self, api, ref, points):
         super(MapWindow, self).__init__()
+        qInstallMessageHandler(lambda *args: None)
         self.api = api
         self.ref = ref
         self.points = points

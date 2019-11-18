@@ -1,11 +1,12 @@
-from Map_Reader.Starter import StarterWindow
+from Map_Reader.Windows import StarterWindow
+from Map_Reader.ProjectController import ProjectController
 from PyQt5 import QtCore
 import pytest
 import time
 
 @pytest.fixture
 def window():
-    window = StarterWindow()
+    window = StarterWindow(ProjectController())
     return window
 
 def test_1(qtbot, window):

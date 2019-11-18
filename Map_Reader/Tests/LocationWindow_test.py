@@ -46,20 +46,6 @@ def test_3(qtbot, window):
 
     assert window.isActiveWindow() == True
 
-def test_4(qtbot, window):
-    '''
-    Test lat, lon fields are limited to 5 decimals
-    '''
-
-    window.latEdit.setText(None)
-    window.lonEdit.setText(None)
-
-    qtbot.keyClicks(window.latEdit, '70.1234567')
-    qtbot.keyClicks(window.lonEdit, '112.1234567')
-
-    assert window.latEdit.text() == '70.12345'
-    assert window.lonEdit.text() == '112.12345'
-
 def test_5(qtbot, window):
     '''
     Test if save is disabled when lat data is not entered
