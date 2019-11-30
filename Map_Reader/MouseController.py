@@ -1,6 +1,5 @@
 import ctypes as ct
 import ctypes.wintypes as cw
-from win32api import LOWORD
 
 #https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-systemparametersinfoa            
 

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QGraphicsDropShadowEffect, QLineEdit, QTreeView, QWidget, QVBoxLayout, QGroupBox, QAbstractItemView, QGridLayout, QPushButton
 from PyQt5.QtCore import QDate, QDateTime, QRegExp, QSortFilterProxyModel, Qt, QTime, QModelIndex, QSize, pyqtSignal, QObject
 from PyQt5.QtGui import QStandardItemModel, QIcon, QStandardItem
 
@@ -87,8 +87,10 @@ class Table(QWidget):
         self.proxyView.setRootIsDecorated(False)
         self.proxyView.setAlternatingRowColors(True)
         self.proxyView.setModel(self.proxyModel)
-        self.proxyView.setSortingEnabled(not self.checkable)
-        self.proxyView.sortByColumn(0, Qt.AscendingOrder)
+
+        if not self.checkable:
+            self.proxyView.setSortingEnabled(True)
+            self.proxyView.sortByColumn(0, Qt.AscendingOrder)
 
         self.proxyView.setEditTriggers(QAbstractItemView.NoEditTriggers)
 

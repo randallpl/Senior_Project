@@ -1,8 +1,9 @@
 from PyQt5.QtCore import Qt, QDateTime, QRegExp
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QWizard, QWizardPage, QLabel, QVBoxLayout, QGridLayout, QMessageBox
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 from geopy import Point
+from CustomQtObjects import LineEdit
 
 #Class to display new project wizard
 class NewProjectWizard(QWizard):
@@ -73,16 +74,16 @@ class WizardDataPage(QWizardPage):
         self.setSubTitle("Please fill all fields.")
 
         self.nameLabel = QLabel("Project Name:")
-        self.nameLineEdit = QLineEdit()
+        self.nameLineEdit = LineEdit()
         self.nameLineEdit.setValidator(QtGui.QRegExpValidator(QRegExp('[^\\\*<>:"/\|?*]+')))
         self.registerField('projectName*', self.nameLineEdit)
 
         self.refLabel = QLabel("Reference Point:")
-        self.latLineEdit = QLineEdit()
+        self.latLineEdit = LineEdit()
         self.latLineEdit.setPlaceholderText('Latitude')
         self.registerField('latitude*', self.latLineEdit)
 
-        self.lonLineEdit = QLineEdit()
+        self.lonLineEdit = LineEdit()
         self.lonLineEdit.setPlaceholderText('Longitude')
         self.registerField('longitude*', self.lonLineEdit)
 

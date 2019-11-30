@@ -719,8 +719,7 @@ class ReferenceSelectionWindow(QDialog):
         h2Layout = QHBoxLayout()
         self.saveButton = Button('Trace')
         self.saveButton.clicked.connect(self.save)
-        self.saveButton.setEnabled(False)
-
+        
         self.cancelButton = Button('Cancel')
         self.cancelButton.clicked.connect(self.cancel)
 
@@ -728,7 +727,6 @@ class ReferenceSelectionWindow(QDialog):
         h2Layout.addWidget(self.cancelButton)
 
         self.table = Table('Reference Points', self.tableData, checkable=True)
-        self.table.proxyView.clicked.connect(self.checkFields)
 
         mainLayout.addWidget(self.table)
         mainLayout.addLayout(h2Layout)
@@ -736,19 +734,15 @@ class ReferenceSelectionWindow(QDialog):
         self.setLayout(mainLayout)
         self.setModal(True)
         self.show()
-
-    def checkFields(self):
-        self.selectedData = self.table.getCheckedRowData()
-
-        if self.selectedData:
-            self.saveButton.setEnabled(True)
-        else:
-            self.saveButton.setEnabled(False)
     
     def save(self):
         '''
         Send reference point back to main window to be stored
         '''
+        self.selectedData = self.table.getCheckedRowData()
+        if not self.selectedData:
+            return
+
         self.selectedData = [(item['Latitude'], item['Longitude']) for item in self.selectedData]
         self.accept()
         self.close()

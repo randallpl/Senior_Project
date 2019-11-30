@@ -5,7 +5,7 @@ from NewProjectWizard import NewProjectWizard
 from Windows import StarterWindow
 
 from PyQt5.QtCore import Qt, QDateTime, QStringListModel, QDate
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import qApp, QMessageBox, QFileDialog
 from PyQt5 import QtGui
 import pandas as pd
 import json
@@ -243,12 +243,3 @@ class ProjectController():
         Return list of project names within Projects directory
         '''
         return [f.name for f in os.scandir(PROJECTS_DIR) if f.is_dir()]
-
-if __name__ == '__main__':
-
-    import sys
-
-    app = QApplication(sys.argv)
-    window = ProjectController()
-    sys.exit(app.exec_())
-            

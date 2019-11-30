@@ -1,12 +1,8 @@
 import sys
-import os
-
 from PyQt5.QtWidgets import QAction, QMainWindow, QMessageBox, QMenu
 from PyQt5.QtCore import QDateTime, QDate, Qt
 import pandas as pd
-import json
 from functools import partial
-import requests
 
 import Tracker
 from Windows import *
@@ -137,8 +133,6 @@ class MainWindow(QMainWindow):
         self.cWidget = QWidget()
 
         self.mapWindow = MapWindow(self.api, self.reference, self.points)
-        self.mapWindow.setMinimumWidth(800)
-        self.mapWindow.setMinimumHeight(600)
 
         self.table = Table(
             'Points', 
@@ -232,7 +226,7 @@ class MainWindow(QMainWindow):
         '''
         Launches window to trace scale
         '''
-        self.scaleTracker = Tracker.Tracker(self)
+        self.scaleTrace = Tracker.Tracker(self)
 
     def confirmScale(self, dist_px):
         '''
@@ -242,9 +236,9 @@ class MainWindow(QMainWindow):
         if self.scaleConfirm.exec_():
             self.scale, self.units = self.scaleConfirm.getConfirmedData()
             self.saveFile()
-            self.scaleTracker.close()
+            self.scaleTrace.close()
         else:
-            self.scaleTracker.resetTrace()
+            self.scaleTrace.resetTrace()
 
     def locationTracker(self):
         '''
@@ -253,7 +247,7 @@ class MainWindow(QMainWindow):
         if self.reference and self.scale and self.units:
             self.referenceTable = ReferenceSelectionWindow(self.reference)
             if self.referenceTable.exec_():
-                self.locationTracker = Tracker.TrackerLoc( 
+                self.locationTrace = Tracker.TrackerLoc( 
                     self.referenceTable.selectedData, 
                     self.scale, 
                     self.units,
@@ -267,14 +261,14 @@ class MainWindow(QMainWindow):
         self.locationConfirm = LocationWindow(lat, lon)
 
         if self.locationConfirm.exec_():
-            self.locationTracker.close()
+            self.locationTrace.close()
             data = self.locationConfirm.getConfirmedData()
             self.points.append(data)
             self.menuExport.setEnabled(True)
             self.saveFile()
             self.refresh()
         else:
-            self.locationTracker.resetTrace()
+            self.locationTrace.resetTrace()
 
     def launchAPISettings(self):
         '''

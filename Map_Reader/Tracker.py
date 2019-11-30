@@ -1,6 +1,5 @@
-import sys
 from PyQt5.QtCore import Qt, QDateTime
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QLabel, QMessageBox, QApplication, QDialog, QWidget
 from PyQt5.QtGui import QCursor, QFont
 from geopy.distance import geodesic
 from collections import namedtuple
@@ -10,10 +9,6 @@ import numpy as np
 import pandas as pd
 
 from CustomQtObjects import *
-
-#Dependencies
-#PyQt5: conda install -c anaconda pyqt 
-#geopy: conda install -c conda-forge geopy
 
 #Create namedtuple for readability to store point data
 Point = namedtuple('Point', 'x y')
@@ -649,11 +644,3 @@ class LocationDisplayWidget(QWidget):
         self.bear_edit.setText(str(bearing))
         self.dist2_edit.setText(str(dist_unit))
         self.new_edit.setText(str(new_loc))
-
-if __name__ == '__main__':
-
-    import sys
-
-    app = QApplication(sys.argv)
-    window = LocationDisplayWidget('km')
-    sys.exit(app.exec_())
