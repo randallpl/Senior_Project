@@ -1,4 +1,4 @@
-"%ProgramFiles%\Python3.8\python.exe" --version 3>NUL
+python --version 3>NUL
 if errorlevel 1 goto errorNoPython
 
 goto mapReader
@@ -8,8 +8,8 @@ goto mapReader
 goto mapReader
 
 :mapReader
-start "Starting Map Reader" "%ProgramFiles%\Python3.8\pythonw.exe" "%~dp0Map_Reader\Starter.py"
 "%ProgramFiles%\Python3.8\python.exe" -m pip install pyqt5 --user
 "%ProgramFiles%\Python3.8\python.exe" -m pip install geopy --user
 "%ProgramFiles%\Python3.8\python.exe" -m pip install pandas --user
 "%ProgramFiles%\Python3.8\python.exe" -m pip install PyQtWebEngine --user
+start "Starting Map Reader" "%ProgramFiles%\Python3.8\pythonw.exe" "%~dp0Map_Reader\Starter.py"
