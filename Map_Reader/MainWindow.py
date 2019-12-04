@@ -147,6 +147,7 @@ class MainWindow(QMainWindow):
             index=True
         )
         self.refDisplayTable.setMinimumHeight(250)
+        self.refDisplayTable.setFixedSize(800, 400)
 
         #Add refrence button and connect it to referenceWindow()
         self.addRefButton = Button('Add Reference')
